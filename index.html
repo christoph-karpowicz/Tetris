@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<body>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<style>
+    body {
+        text-align: center;
+    }
+    #g {
+        margin: auto;
+        border: 1px solid #000;
+    }
+</style>
+</head>
+<!-- <form>
+    Test: <input type="text" name="test" />
+    <input type="submit" name="submit" id="submit" />
+</form>
+<button id="send">tttt</button><br /> -->
+<canvas id="g" width="500" height="500"></canvas>
+<script>
+
+var Module = {
+    onRuntimeInitialized: function() {
+        // console.log('lerp result: ' + Module.lerp(1, 2, 0.5));
+        // Module.update();
+        const main = new Module.Main(11);
+        console.log(main.showi());
+        main.set_j(12);
+        console.log(main.get_j());
+
+        const game = new Module.Game(500, 500);
+        game.addSquare();
+        game.addSquare();
+
+        requestAnimationFrame(function f() {
+            game.update();
+            requestAnimationFrame(f);
+        });
+        console.log(game.getSquareAtPostion(0));
+
+        let sq = new Module.Shape(0,0,50,50);
+        console.log(sq.getYY());
+        // console.log(game.getWidth());
+
+        let c = document.querySelector('canvas');              
+        c.onclick = function(e) {
+            console.log(e.clientX, e.clientY)
+            // ball.move(e.clientX, e.clientY);
+            // ball.update();
+        };
+
+    },
+    preRun: [function() {
+        // const update = cwrap('update', null, []);
+        // requestAnimationFrame(function f() {
+        //     // update();
+        //     requestAnimationFrame(f);
+        // });
+    }],
+};
+
+$('#submit').submit((e) => {
+    e.preventDefault();
+    console.log('ssssss');
+    $.ajax({
+        method: "GET",
+        url: "/",
+        data: {
+            test: "ttttttttttttt"
+        }
+    }).done(() => {
+        console.log('aaaaaaa');
+    });
+});
+
+$('#send').on('click', (e) => {
+    e.preventDefault();
+    console.log('ssssss');
+    $.ajax({
+        method: "GET",
+        url: "/",
+        data: {
+            test: "ttttttttttttt"
+        }
+    }).done((res) => {
+        console.log(res);
+    });
+});
+
+class G {
+
+    constructor(args) {
+        this.width = args.width;
+        this.height = args.height;
+        this.division = args.division;
+    }
+
+}
+
+class Piece {
+
+    constructor(args) {
+        this.x = args.x;
+        this.y = args.y;
+        this.speed = args.speed;
+    }
+    
+}
+
+$(document).ready(function() {
+    let gameObject = new G({
+        width: 500,
+        height: 500,
+        division: 50
+    });
+});
+    
+</script>
+<script src="app.js"></script>
+<script>
+    Module.addOnPostRun(() => {
+
+        // const main = new Module.Main(11);
+        // console.log(main.showi());
+        // main.set_j(12);
+        // console.log(main.get_j());
+
+        // const update = Module.update();
+        // update();
+
+    });
+
+    // WebAssembly.instantiateStreaming(fetch('a.out.wasm'))
+    // .then(function(results) {
+    //     console.log(results.instance.exports);
+    //     // console.log(results.instance.exports.__Z7squareri(11111));
+    //     // var showi = results.instance.exports.showi;
+    //     // var tbl = results.instance.exports.tbl;
+    //     // console.log(tbl.get(0)());  // 13
+    //     // console.log(tbl.get(1)());  // 42
+    //     // let c = document.getElementById('canvas');
+    //     // c.onclick = function () {
+    //     //     console.log(showi(2)());  // 13
+    //     // };
+    // });
+</script>
+</body>
+</html>

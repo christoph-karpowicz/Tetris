@@ -1,0 +1,4 @@
+/libevent
+/*.o
+/a.out
+/*.wasm
