@@ -1223,11 +1223,11 @@ function updateGlobalBufferViews() {
 
 
 var STATIC_BASE = 1024,
-    STACK_BASE = 8912,
+    STACK_BASE = 8896,
     STACKTOP = STACK_BASE,
-    STACK_MAX = 5251792,
-    DYNAMIC_BASE = 5251792,
-    DYNAMICTOP_PTR = 8656;
+    STACK_MAX = 5251776,
+    DYNAMIC_BASE = 5251776,
+    DYNAMICTOP_PTR = 8640;
 
 assert(STACK_BASE % 16 === 0, 'stack must start aligned');
 assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
@@ -1696,8 +1696,8 @@ Module['asm'] = function(global, env, providedBuffer) {
   ;
   // import table
   env['table'] = wasmTable = new WebAssembly.Table({
-    'initial': 1120,
-    'maximum': 1120,
+    'initial': 928,
+    'maximum': 928,
     'element': 'anyfunc'
   });
   env['__memory_base'] = 1024; // tell the memory segments where to place themselves
@@ -1718,7 +1718,7 @@ function _dump(data){ console.log(data); }
 
 
 
-// STATICTOP = STATIC_BASE + 7888;
+// STATICTOP = STATIC_BASE + 7872;
 /* global initializers */  __ATINIT__.push({ func: function() { globalCtors() } });
 
 
@@ -1729,7 +1729,7 @@ function _dump(data){ console.log(data); }
 
 
 /* no memory initializer */
-var tempDoublePtr = 8896
+var tempDoublePtr = 8880
 assert(tempDoublePtr % 8 == 0);
 
 function copyTempFloat(ptr) { // functions, because inlining this code increases code size too much

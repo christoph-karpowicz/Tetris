@@ -38,15 +38,32 @@ void Game::init() {
 };
 
 void Game::update() {
+    bool addAnotherPiece = true;
     // width += 1;  
     // dump(to_string(width));
     clearCanvas();
-    for (Square s : squaresVector) {
+    for (Square &s : squaresVector) {
         if (!s.isStill()) {
-            s.moveDown();
+            
+            if (s.bottomRightCoordinates()[1] != width) {
+
+                s.moveDown();
+
+            } else {
+                s.setStill();
+            }
+            
+            addAnotherPiece = false;
+
         }
         drawSquare(s.getX(), s.getY(), s.getWidth(), s.getHeight());
         // dump(to_string(s.getWidth()));
+        
+        
+    }
+
+    if (addAnotherPiece) {
+        addSquare();
     }
 };
 
@@ -63,6 +80,6 @@ emscripten::val Game::getSquareAtPostion(int position) {
     // string squareDescription = "y: " + to_string(squaresVector.at(position).getY());
     // return squaresVector.at(position);
     emscripten::val returnVal = emscripten::val::object();
-    returnVal.set("square", emscripten::val(squaresVector.at(position).getY()));
+    returnVal.set("square", emscripten::val(squaresVector.at(position).getYY()));
     return returnVal;
 };

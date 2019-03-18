@@ -7,28 +7,40 @@ using namespace std;
 
 namespace G {
 
-    class Shape {
-        protected:
-            int width, height, x, y;
+    class GameObject {
+        protected: 
+            int x, y;
             bool still;
-
+            
         public:
-            Shape(int startX, int startY, int w, int h);
-            void moveDown();
-            int getX();
-            emscripten::val getYY();
-            int getY();
+            GameObject(int startX, int startY);
+            virtual void moveDown();
+            bool isStill();
+            void setStill();
+            int* bottomRightCoordinates();
+            
+    };
+
+    class Square: public GameObject {
+        private:
+            int width, height;
+        
+        public:
+            Square(int startX, int startY, int w, int h);
+            int getX() const;
+            int getY() const;
+            emscripten::val getYY() const;
             void setX(int newX);
             void setY(int newY);
-            int getWidth();
-            int getHeight();
-            bool isStill();
+            int getWidth() const;
+            int getHeight() const;
+            int* bottomRightCoordinates();
 
     };
 
-    class Square: public Shape {
+    class Figure {
         public:
-            Square(int startX, int startY, int w, int h);
+            Figure(int startX, int startY, int w, int h);
 
     };
 

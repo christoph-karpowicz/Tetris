@@ -23,12 +23,6 @@
 
 var Module = {
     onRuntimeInitialized: function() {
-        // console.log('lerp result: ' + Module.lerp(1, 2, 0.5));
-        // Module.update();
-        const main = new Module.Main(11);
-        console.log(main.showi());
-        main.set_j(12);
-        console.log(main.get_j());
 
         const game = new Module.Game(500, 500);
         game.addSquare();
@@ -40,7 +34,9 @@ var Module = {
         });
         console.log(game.getSquareAtPostion(0));
 
-        let sq = new Module.Shape(0,0,50,50);
+        let sq = new Module.Square(0,0,50,50);
+        sq.setY(111);
+        console.log(sq.getYY());
         console.log(sq.getYY());
         // console.log(game.getWidth());
 

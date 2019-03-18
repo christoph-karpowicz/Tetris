@@ -1,4 +1,6 @@
+/.gitignore
 /libevent
 /*.o
 /a.out
+/app.js
 /*.wasm
