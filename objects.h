@@ -17,13 +17,14 @@ namespace G {
             virtual void moveDown();
             bool isStill();
             void setStill();
-            int* bottomRightCoordinates();
+            virtual int* bottomRightCoordinates();
             
     };
 
     class Square: public GameObject {
         private:
             int width, height;
+            bool active;
         
         public:
             Square(int startX, int startY, int w, int h);
@@ -38,24 +39,51 @@ namespace G {
 
     };
 
-    class Figure {
+    class FigureCell {
+        private:
+            bool empty;
+            Square*** sa;
+                    
+        public:
+            FigureCell();
+            ~FigureCell();
+            bool isEmpty();
+            void fill(int startX, int startY, int w, int h);
+            // Square* getSquare();
+            Square*** getSquares();
+
+    };
+
+    class Figure: public GameObject {
+        private:
+            Square ***squaresArray;
+            vector<vector<FigureCell>> squaresVector;
+            int numberOfSquares, arrayDim;
+            void addSquare(int startX, int startY, int w, int h, int row, int column);
+        
         public:
             Figure(int startX, int startY, int w, int h);
+            ~Figure();
+            // vector<vector<FigureCell>>* getSquares();
+            Square*** getSquares();
+            int getNumberOfSquares() const;
+            int* bottomRightCoordinates();
 
     };
 
     class Game {
         private:
             int width, height;
-            vector<Square> squaresVector;
+            vector<Figure> figuresVector;
+            vector<FigureCell> fcv;
 
         public:
             Game(int w, int h);
             void init();
             void update();
-            void addSquare();
-            void deleteSquare();
-            emscripten::val getSquareAtPostion(int position);
+            void addFigure();
+            void deleteFigure();
+            // emscripten::val getSquareAtPostion(int position);
     };
 
 }

@@ -8,17 +8,17 @@
 
 #include "objects.h"
 
-using namespace G;
+using namespace G;            
 
 EMSCRIPTEN_BINDINGS() {
     
     emscripten::class_<Game>("Game")     
       .constructor<int, int>() 
-      .function("init", &Game::init)
-      .function("addSquare", &Game::addSquare)
-      .function("deleteSquare", &Game::deleteSquare)
-      .function("getSquareAtPostion", &Game::getSquareAtPostion)
-      .function("update", &Game::update);
+      .function("init", &Game::init)                                   
+      .function("addFigure", &Game::addFigure)
+      .function("deleteFigure", &Game::deleteFigure)
+      // .function("getSquareAtPostion", &Game::getSquareAtPostion)
+      .function("update", &Game::update);  
 
     emscripten::class_<GameObject>("GameObject")  
       .constructor<int, int>()
@@ -27,18 +27,24 @@ EMSCRIPTEN_BINDINGS() {
       .function("setStill", &GameObject::setStill)
       .function("bottomRightCoordinates", &GameObject::bottomRightCoordinates, emscripten::allow_raw_pointers())
       .function("moveDown", &GameObject::moveDown);
-      // .allow_subclass<Square>("Square");
+      // .allow_subclass<Square>("Square");                        
 
     // emscripten::class_<Square>("Square")
     emscripten::class_<Square, emscripten::base<GameObject>>("Square")
-      .constructor<int, int, int, int>()
+      .constructor<int, int, int, int>() 
       .function("getX", &Square::getX)
       .function("getY", &Square::getY)
-      .function("getYY", &Square::getYY)
+      .function("getYY", &Square::getYY) 
       .function("setX", &Square::setX) 
       .function("setY", &Square::setY)
-      .function("getWidth", &Square::getWidth) 
-      .function("getHeight", &Square::getHeight)
+      .function("getWidth", &Square::getWidth)  
+      .function("getHeight", &Square::getHeight) 
       .function("bottomRightCoordinates", &Square::bottomRightCoordinates, emscripten::allow_raw_pointers());
+
+    emscripten::class_<Figure, emscripten::base<GameObject>>("Figure")
+      .constructor<int, int, int, int>()
+      .function("getNumberOfSquares", &Figure::getNumberOfSquares)
+      .function("getSquares", &Figure::getSquares, emscripten::allow_raw_pointers())
+      .function("bottomRightCoordinates", &Figure::bottomRightCoordinates, emscripten::allow_raw_pointers());
 
 }

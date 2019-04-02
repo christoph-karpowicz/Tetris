@@ -25,20 +25,14 @@ var Module = {
     onRuntimeInitialized: function() {
 
         const game = new Module.Game(500, 500);
-        game.addSquare();
-        game.addSquare();
+        game.addFigure();
+        game.addFigure();
 
         requestAnimationFrame(function f() {
             game.update();
             requestAnimationFrame(f);
         });
-        console.log(game.getSquareAtPostion(0));
-
-        let sq = new Module.Square(0,0,50,50);
-        sq.setY(111);
-        console.log(sq.getYY());
-        console.log(sq.getYY());
-        // console.log(game.getWidth());
+        // console.log(game.getSquareAtPostion(0));
 
         let c = document.querySelector('canvas');              
         c.onclick = function(e) {

@@ -7,7 +7,7 @@ Square::Square(int startX, int startY, int w, int h):
     width(w),
     height(h) 
 {
-
+    active = false;
 };
 
 int Square::getX() const {

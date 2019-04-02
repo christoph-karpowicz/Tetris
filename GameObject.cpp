@@ -25,4 +25,4 @@ void GameObject::setStill() {
 
 int* GameObject::bottomRightCoordinates() {
     return 0;
-}
+};
