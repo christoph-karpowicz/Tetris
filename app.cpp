@@ -15,7 +15,7 @@ EMSCRIPTEN_BINDINGS() {
     emscripten::class_<Game>("Game")     
       .constructor<int, int>() 
       .function("init", &Game::init)                                   
-      .function("addFigure", &Game::addFigure)
+      .function("addSquareSet", &Game::addSquareSet)
       .function("deleteFigure", &Game::deleteFigure)
       // .function("getSquareAtPostion", &Game::getSquareAtPostion)
       .function("update", &Game::update);  
@@ -41,10 +41,10 @@ EMSCRIPTEN_BINDINGS() {
       .function("getHeight", &Square::getHeight) 
       .function("bottomRightCoordinates", &Square::bottomRightCoordinates, emscripten::allow_raw_pointers());
 
-    emscripten::class_<Figure, emscripten::base<GameObject>>("Figure")
-      .constructor<int, int, int, int>()
-      .function("getNumberOfSquares", &Figure::getNumberOfSquares)
-      .function("getSquares", &Figure::getSquares, emscripten::allow_raw_pointers())
-      .function("bottomRightCoordinates", &Figure::bottomRightCoordinates, emscripten::allow_raw_pointers());
+    // emscripten::class_<Figure, emscripten::base<GameObject>>("Figure")
+    //   .constructor<int, int, int, int>()
+    //   .function("getNumberOfSquares", &Figure::getNumberOfSquares)
+    //   .function("getSquares", &Figure::getSquares, emscripten::allow_raw_pointers())
+    //   .function("bottomRightCoordinates", &Figure::bottomRightCoordinates, emscripten::allow_raw_pointers());
 
 }

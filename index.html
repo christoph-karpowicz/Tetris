@@ -25,8 +25,8 @@ var Module = {
     onRuntimeInitialized: function() {
 
         const game = new Module.Game(500, 500);
-        game.addFigure();
-        game.addFigure();
+        game.addSquareSet();
+        // game.addSquareSet();
 
         requestAnimationFrame(function f() {
             game.update();

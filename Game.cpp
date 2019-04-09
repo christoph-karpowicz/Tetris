@@ -1,5 +1,7 @@
 #include <vector>
+#include <list>
 #include <string>
+#include <time.h>  
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include "objects.h"
@@ -21,9 +23,9 @@ EM_JS(void, clearCanvas, (), {
     context.clearRect(0, 0, canvas.width, canvas.height);
 });
 
-// EM_JS(void, dump, (string data), {
-//     console.log(data);
-// });
+EM_JS(void, dump, (string data), {
+    console.log(data);
+});
 
 using namespace G;
 using namespace std;
@@ -31,8 +33,9 @@ using namespace std;
 Game::Game(int w, int h) {
     width = w;
     height = h;
-    figuresVector = {};
-    fcv = {};
+    SquareSet* squareSet = nullptr;
+    squaresList = {};
+    gameOver = false;
 };
 
 void Game::init() {
@@ -40,54 +43,63 @@ void Game::init() {
 };
 
 void Game::update() {
-    bool addAnotherPiece = true;
-    // width += 1;  
-    // dump(to_string(width));
+    bool reset = false;
     clearCanvas();
-    for (Figure &f : figuresVector) {
-        if (!f.isStill()) {
-            
-            int* coord;
-            coord = f.bottomRightCoordinates();
-            if (coord[1] != height) {
 
-                // f.moveDown();
+    Square*** sq = squareSet->getSquares(); 
 
-            } else {
-                f.setStill();
-            }
-            
-            addAnotherPiece = false;
-
-        }
-
-        Square*** figureSquares = f.getSquares();
-        for (int i = 1; i <= f.getNumberOfSquares(); i++) {
-            for (int j = 1; j <= f.getNumberOfSquares(); j++) {
-                if (figureSquares[i][j] != 0) {
-                    int x = figureSquares[i][j]->getX();
-                    int y = figureSquares[i][j]->getY();
-                    int w = figureSquares[i][j]->getWidth();
-                    int h = figureSquares[i][j]->getHeight();
-                    // if (x == NULL || x == 0) dump("aaaa");
-                    // dump("aaaa");
-                    drawSquare(x, y, w, h);
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (sq[i][j] != 0) {
+                if (sq[i][j]->getY() == height - sq[i][j]->getHeight()) {
+                    reset = true;
+                    goto resetConditionsMet;
                 }
             }
         }
+    }
 
-        // for (int i = 0; i < f.getNumberOfSquares(); i++) {
-        //     drawSquare(figureSquares[i]->getX(), figureSquares[i]->getY(), figureSquares[i]->getWidth(), figureSquares[i]->getHeight());
-        //     // dump("aaa");
-        // }
-        // drawSquare(f.getX(), f.getY(), f.getWidth(), f.getHeight());
-        // dump(to_string(s.getWidth()));
-        
+    for (Square* &s : squaresList) {
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (sq[i][j] != 0) {
+                    if (sq[i][j]->getY() + sq[i][j]->getHeight() == s->getY() && sq[i][j]->getX() == s->getX()) {
+                        reset = true;
+                        goto resetConditionsMet;
+                    }
+                }
+            }
+        }
         
     }
 
-    for (FigureCell &FC : fcv) {
-        Square*** sq = FC.getSquares(); 
+    resetConditionsMet:
+    if (reset) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                sq[i][j]->setStill();
+                squaresList.push_back(sq[i][j]);
+            }
+        }
+        delete squareSet;
+
+        for (Square* &s : squaresList) {
+            int y = s->getY();
+            bool sqaureStill = s->isStill();
+            if (sqaureStill && y < 0) {
+                gameOver = true;
+                break;
+            }
+        }
+
+        if (!gameOver) addSquareSet();
+        
+    }
+
+    if (!gameOver) {
+        squareSet->moveDown();
+
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (sq[i][j] != 0) {
@@ -99,20 +111,28 @@ void Game::update() {
                 }
             }
         }
-
     }
 
-    if (addAnotherPiece) {
-        // addFigure();
+    for (Square* &s : squaresList) {
+
+        int x = s->getX();
+        int y = s->getY();
+        int w = s->getWidth();
+        int h = s->getHeight();
+        drawSquare(x, y, w, h);
+        
     }
+
 };
 
-void Game::addFigure() {
-    Figure newFigure = Figure(0, 0, width/20, height/20);
-    figuresVector.push_back(newFigure);
-    FigureCell fc = FigureCell();
-    fc.fill(50,50,50,50);
-    fcv.push_back(fc);
+void Game::addSquareSet() {
+    srand(time(NULL));
+    int randX = rand() % (width/(width/10));
+    // SquareSet newSquareSet = SquareSet(randX, 0);
+    // SquareSet newSquareSet = SquareSet(0, 0);
+    squareSet = new SquareSet(randX*(width/10), 0-(height/10 * 3));
+    squareSet->fill(width/10,width/10);
+    // squareSetsVector.push_back(newSquareSet);
 };
 
 void Game::deleteFigure() {
@@ -120,9 +140,9 @@ void Game::deleteFigure() {
 };
 
 // emscripten::val Game::getSquareAtPostion(int position) {
-//     // string squareDescription = "y: " + to_string(figuresVector.at(position).getY());
-//     // return figuresVector.at(position);
+//     // string squareDescription = "y: " + to_string(squareSetsVector.at(position).getY());
+//     // return squareSetsVector.at(position);
 //     emscripten::val returnVal = emscripten::val::object();
-//     returnVal.set("square", emscripten::val(figuresVector.at(position).getYY()));
+//     returnVal.set("square", emscripten::val(squareSetsVector.at(position).getYY()));
 //     return returnVal;
 // };

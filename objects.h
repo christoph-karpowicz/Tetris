@@ -1,6 +1,7 @@
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include <vector>
+#include <list>
 #include <string>
 
 using namespace std;
@@ -39,25 +40,28 @@ namespace G {
 
     };
 
-    class FigureCell {
+    class SquareSet: public GameObject {
         private:
             bool empty;
             Square*** sa;
+            int numberOfSquares;
                     
         public:
-            FigureCell();
-            ~FigureCell();
+            static bool instanceActive;
+            SquareSet(int startX, int startY);
+            ~SquareSet();
             bool isEmpty();
-            void fill(int startX, int startY, int w, int h);
+            void fill(int w, int h);
             // Square* getSquare();
             Square*** getSquares();
+            void moveDown();
 
     };
 
     class Figure: public GameObject {
         private:
             Square ***squaresArray;
-            vector<vector<FigureCell>> squaresVector;
+            // vector<vector<FigureCell>> squaresVector;
             int numberOfSquares, arrayDim;
             void addSquare(int startX, int startY, int w, int h, int row, int column);
         
@@ -73,15 +77,16 @@ namespace G {
 
     class Game {
         private:
+            bool gameOver;
             int width, height;
-            vector<Figure> figuresVector;
-            vector<FigureCell> fcv;
+            SquareSet* squareSet;
+            list<Square*> squaresList;
 
         public:
             Game(int w, int h);
             void init();
             void update();
-            void addFigure();
+            void addSquareSet();
             void deleteFigure();
             // emscripten::val getSquareAtPostion(int position);
     };
