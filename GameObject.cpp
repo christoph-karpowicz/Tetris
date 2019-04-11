@@ -15,6 +15,8 @@ void GameObject::moveDown() {
     y += 1;
 };
 
+void GameObject::horizontalMovement(bool left) {};
+
 bool GameObject::isStill() {
     return still;
 };

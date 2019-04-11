@@ -33,81 +33,96 @@ using namespace std;
 Game::Game(int w, int h) {
     width = w;
     height = h;
+    squareWidth = width/20;
+    squareHeight = height/20;
     SquareSet* squareSet = nullptr;
     squaresList = {};
     gameOver = false;
 };
 
-void Game::init() {
+bool Game::isGameOver() const {
+    return gameOver;
+};
 
+void Game::setGameStatus(bool over) {
+    gameOver = over;
+};
+
+void Game::init() {
+    squaresList.clear();
 };
 
 void Game::update() {
     bool reset = false;
     clearCanvas();
 
-    Square*** sq = squareSet->getSquares(); 
+    if (!isGameOver()) {
 
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            if (sq[i][j] != 0) {
-                if (sq[i][j]->getY() == height - sq[i][j]->getHeight()) {
-                    reset = true;
-                    goto resetConditionsMet;
-                }
-            }
-        }
-    }
-
-    for (Square* &s : squaresList) {
+        clearRows();
+        
+        Square*** sq = squareSet->getSquares(); 
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (sq[i][j] != 0) {
-                    if (sq[i][j]->getY() + sq[i][j]->getHeight() == s->getY() && sq[i][j]->getX() == s->getX()) {
+                    if (sq[i][j]->getY() == height - sq[i][j]->getHeight()) {
                         reset = true;
                         goto resetConditionsMet;
                     }
                 }
             }
         }
-        
-    }
-
-    resetConditionsMet:
-    if (reset) {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                sq[i][j]->setStill();
-                squaresList.push_back(sq[i][j]);
-            }
-        }
-        delete squareSet;
 
         for (Square* &s : squaresList) {
-            int y = s->getY();
-            bool sqaureStill = s->isStill();
-            if (sqaureStill && y < 0) {
-                gameOver = true;
-                break;
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (sq[i][j] != 0) {
+                        if (sq[i][j]->getY() + sq[i][j]->getHeight() == s->getY() && sq[i][j]->getX() == s->getX()) {
+                            reset = true;
+                            goto resetConditionsMet;
+                        }
+                    }
+                }
             }
+            
         }
 
-        if (!gameOver) addSquareSet();
-        
-    }
+        resetConditionsMet:
+        if (reset) {
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    sq[i][j]->setStill();
+                    squaresList.push_back(sq[i][j]);
+                }
+            }
+            delete squareSet;
 
-    if (!gameOver) {
-        squareSet->moveDown();
+            for (Square* &s : squaresList) {
+                int y = s->getY();
+                bool sqaureStill = s->isStill();
+                if (sqaureStill && y < 0) {
+                    setGameStatus(true);
+                    break;
+                }
+            }
 
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (sq[i][j] != 0) {
-                    int x = sq[i][j]->getX();
-                    int y = sq[i][j]->getY();
-                    int w = sq[i][j]->getWidth();
-                    int h = sq[i][j]->getHeight();
-                    drawSquare(x, y, w, h);
+            if (!isGameOver()) addSquareSet();
+            
+        }
+
+        if (!isGameOver()) {
+            squareSet->moveDown();
+
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (sq[i][j] != 0) {
+                        int x = sq[i][j]->getX();
+                        int y = sq[i][j]->getY();
+                        int w = sq[i][j]->getWidth();
+                        int h = sq[i][j]->getHeight();
+                        drawSquare(x, y, w, h);
+                    }
                 }
             }
         }
@@ -127,12 +142,69 @@ void Game::update() {
 
 void Game::addSquareSet() {
     srand(time(NULL));
-    int randX = rand() % (width/(width/10));
+    int randX = rand() % (width/squareWidth - 2);
     // SquareSet newSquareSet = SquareSet(randX, 0);
     // SquareSet newSquareSet = SquareSet(0, 0);
-    squareSet = new SquareSet(randX*(width/10), 0-(height/10 * 3));
-    squareSet->fill(width/10,width/10);
+    squareSet = new SquareSet(randX*(squareWidth), 0 - (squareHeight * 3));
+    squareSet->fill(squareWidth, squareHeight);
     // squareSetsVector.push_back(newSquareSet);
+};
+
+void Game::clearRow(int row, int perRow) {
+
+    for (auto it = squaresList.begin(); it != squaresList.end(); ) {
+
+        Square* sq = *it;
+        if (sq->getY() == row * squareHeight) {
+            it = squaresList.erase(it);
+        } else {
+            ++it;
+        }
+
+    }
+
+    for (Square* &s : squaresList) {
+
+        if (s->getY() < row * squareHeight) {
+            int newY = s->getY() + squareHeight;
+            s->setY(newY);
+        }
+        
+    }
+
+};
+
+void Game::clearRows() {
+
+    int squaresPerRow = width/squareWidth,
+        rows = height/squareHeight;
+
+    for (int i = 0; i < rows; i++) {
+
+        int squaresFound = 0;
+
+        for (Square* &s : squaresList) {
+
+            if (s->getY() == i * squareHeight) squaresFound++;
+            if (squaresFound == squaresPerRow) {
+                clearRow(i, squaresPerRow);
+                i = 0;
+                break;
+            }
+            
+        }
+
+    }
+
+};
+
+void Game::moveSquareSet(bool left) {
+    if (!squareSet->nextToBorder(width, left))
+        left ? squareSet->horizontalMovement(true) : squareSet->horizontalMovement(false);
+};
+
+void Game::rotateSquareSet() {
+    squareSet->rotate();
 };
 
 void Game::deleteFigure() {

@@ -16,6 +16,7 @@ namespace G {
         public:
             GameObject(int startX, int startY);
             virtual void moveDown();
+            virtual void horizontalMovement(bool left);
             bool isStill();
             void setStill();
             virtual int* bottomRightCoordinates();
@@ -37,13 +38,14 @@ namespace G {
             int getWidth() const;
             int getHeight() const;
             int* bottomRightCoordinates();
+            void horizontalMovement(bool left);
 
     };
 
     class SquareSet: public GameObject {
         private:
             bool empty;
-            Square*** sa;
+            Square*** squaresArray;
             int numberOfSquares;
                     
         public:
@@ -55,32 +57,20 @@ namespace G {
             // Square* getSquare();
             Square*** getSquares();
             void moveDown();
-
-    };
-
-    class Figure: public GameObject {
-        private:
-            Square ***squaresArray;
-            // vector<vector<FigureCell>> squaresVector;
-            int numberOfSquares, arrayDim;
-            void addSquare(int startX, int startY, int w, int h, int row, int column);
-        
-        public:
-            Figure(int startX, int startY, int w, int h);
-            ~Figure();
-            // vector<vector<FigureCell>>* getSquares();
-            Square*** getSquares();
-            int getNumberOfSquares() const;
-            int* bottomRightCoordinates();
+            void horizontalMovement(bool left);
+            bool nextToBorder(int w, bool left);
+            void rotate();
 
     };
 
     class Game {
         private:
             bool gameOver;
-            int width, height;
+            int width, height, squareWidth, squareHeight;
             SquareSet* squareSet;
             list<Square*> squaresList;
+            void clearRow(int row, int perRow);
+            void clearRows();
 
         public:
             Game(int w, int h);
@@ -88,6 +78,10 @@ namespace G {
             void update();
             void addSquareSet();
             void deleteFigure();
+            bool isGameOver() const;
+            void setGameStatus(bool over);
+            void moveSquareSet(bool left);
+            void rotateSquareSet();
             // emscripten::val getSquareAtPostion(int position);
     };
 

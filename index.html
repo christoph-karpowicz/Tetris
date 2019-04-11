@@ -18,13 +18,13 @@
     <input type="submit" name="submit" id="submit" />
 </form>
 <button id="send">tttt</button><br /> -->
-<canvas id="g" width="500" height="500"></canvas>
+<canvas id="g" width="400" height="400"></canvas>
 <script>
 
 var Module = {
     onRuntimeInitialized: function() {
 
-        const game = new Module.Game(500, 500);
+        const game = new Module.Game(400, 400);
         game.addSquareSet();
         // game.addSquareSet();
 
@@ -40,6 +40,20 @@ var Module = {
             // ball.move(e.clientX, e.clientY);
             // ball.update();
         };
+
+        $(document).keypress(function(e) {
+            switch (e.keyCode) {
+                case 97:
+                    game.moveSquareSet(true);
+                    break;
+                case 100:
+                    game.moveSquareSet(false);
+                    break;
+                case 119:
+                    game.rotateSquareSet();
+                    break;
+            }
+        });
 
     },
     preRun: [function() {

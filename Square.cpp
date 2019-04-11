@@ -24,6 +24,14 @@ emscripten::val Square::getYY() const {
     return returnVal;
 }
 
+void Square::horizontalMovement(bool left) {
+    int change = left ? width * (-1) : width;
+    // if (left) change 
+        setX(x + change);
+    // else
+    //     setX(x + width);
+};
+
 void Square::setX(int newX) {
     x = newX;
 };

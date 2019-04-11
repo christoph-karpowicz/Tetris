@@ -17,6 +17,8 @@ EMSCRIPTEN_BINDINGS() {
       .function("init", &Game::init)                                   
       .function("addSquareSet", &Game::addSquareSet)
       .function("deleteFigure", &Game::deleteFigure)
+      .function("moveSquareSet", &Game::moveSquareSet)
+      .function("rotateSquareSet", &Game::rotateSquareSet)
       // .function("getSquareAtPostion", &Game::getSquareAtPostion)
       .function("update", &Game::update);  
 
