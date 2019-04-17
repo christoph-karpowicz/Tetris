@@ -7,6 +7,7 @@
 // source ~/emsdk/emsdk_env.sh
 
 #include "objects.h"
+#include "SquareSetRotationFunctions.h"
 
 using namespace G;            
 
@@ -16,7 +17,6 @@ EMSCRIPTEN_BINDINGS() {
       .constructor<int, int>() 
       .function("init", &Game::init)                                   
       .function("addSquareSet", &Game::addSquareSet)
-      .function("deleteFigure", &Game::deleteFigure)
       .function("moveSquareSet", &Game::moveSquareSet)
       .function("rotateSquareSet", &Game::rotateSquareSet)
       // .function("getSquareAtPostion", &Game::getSquareAtPostion)
@@ -34,14 +34,12 @@ EMSCRIPTEN_BINDINGS() {
     // emscripten::class_<Square>("Square")
     emscripten::class_<Square, emscripten::base<GameObject>>("Square")
       .constructor<int, int, int, int>() 
-      .function("getX", &Square::getX)
-      .function("getY", &Square::getY)
       .function("getYY", &Square::getYY) 
-      .function("setX", &Square::setX) 
-      .function("setY", &Square::setY)
       .function("getWidth", &Square::getWidth)  
       .function("getHeight", &Square::getHeight) 
       .function("bottomRightCoordinates", &Square::bottomRightCoordinates, emscripten::allow_raw_pointers());
+
+    emscripten::function("verticallySymetric", &G::verticallySymetric, emscripten::allow_raw_pointers());
 
     // emscripten::class_<Figure, emscripten::base<GameObject>>("Figure")
     //   .constructor<int, int, int, int>()

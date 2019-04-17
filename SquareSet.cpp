@@ -1,3 +1,4 @@
+#include "SquareSetRotationFunctions.h"
 #include "objects.h"
 #include <time.h>  
 
@@ -67,16 +68,18 @@ Square*** SquareSet::getSquares() {
     return squaresArray;
 };
 
-void SquareSet::moveDown() {
+void SquareSet::moveDown(int speed) {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             int oldY = squaresArray[i][j]->getY();
-            squaresArray[i][j]->setY(oldY + 2);
+            squaresArray[i][j]->setY(oldY + speed);
         }
     }
+    y = y + speed;
 }
 
 void SquareSet::horizontalMovement(bool left) {
+    int squareWidth = 0;
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             if (squaresArray[i][j] != 0) {
@@ -84,9 +87,12 @@ void SquareSet::horizontalMovement(bool left) {
                     squaresArray[i][j]->horizontalMovement(true);
                 else 
                     squaresArray[i][j]->horizontalMovement(false);
+                if (squareWidth == 0) squareWidth = squaresArray[i][j]->getWidth();
             }
         }
     }
+    int change = left ? squareWidth * (-1) : squareWidth;
+    setX(x + change);
 };
 
 bool SquareSet::nextToBorder(int w, bool left) {
@@ -115,36 +121,19 @@ void SquareSet::rotate() {
     
     // srand(time(NULL));
     // int rotationType = rand() % 4 + 1;
-    int rotationType = 1;
+    int rotationType = 3;
     switch (rotationType) {
         case 1:
-
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    if (squaresArray[i][j] != 0) {
-                        if (i == 0) {
-                            int newY = squaresArray[i][j]->getY() + (squaresArray[i][j]->getHeight() * 2);
-                            squaresArray[i][j]->setY(newY);
-                            tmpSquaresArray[2][j] = squaresArray[i][j];
-                        }
-                        if (i == 1) {
-                            tmpSquaresArray[i][j] = squaresArray[i][j];
-                        }
-                        if (i == 2) {
-                            int newY = squaresArray[i][j]->getY() - (squaresArray[i][j]->getHeight() * 2);
-                            squaresArray[i][j]->setY(newY);
-                            tmpSquaresArray[0][j] = squaresArray[i][j];
-                        }
-                    }
-                }
-            }
-
+            verticallySymetric(tmpSquaresArray, *this);
             break;
         case 2:
+            horizontallySymetric(tmpSquaresArray, *this);
             break;
         case 3:
+            deg90p(tmpSquaresArray, *this);
             break;
         case 4:
+            deg90m(tmpSquaresArray, *this);
             break;
     }
 

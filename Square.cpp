@@ -10,14 +10,6 @@ Square::Square(int startX, int startY, int w, int h):
     active = false;
 };
 
-int Square::getX() const {
-    return x;
-};
-
-int Square::getY() const {
-    return y;
-};
-
 emscripten::val Square::getYY() const {
     emscripten::val returnVal = emscripten::val::object();
     returnVal.set("y", emscripten::val(y));
@@ -26,18 +18,7 @@ emscripten::val Square::getYY() const {
 
 void Square::horizontalMovement(bool left) {
     int change = left ? width * (-1) : width;
-    // if (left) change 
-        setX(x + change);
-    // else
-    //     setX(x + width);
-};
-
-void Square::setX(int newX) {
-    x = newX;
-};
-
-void Square::setY(int newY) {
-    y = newY;
+    setX(x + change);
 };
 
 int Square::getWidth() const {

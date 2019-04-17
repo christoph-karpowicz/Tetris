@@ -33,11 +33,18 @@ using namespace std;
 Game::Game(int w, int h) {
     width = w;
     height = h;
-    squareWidth = width/20;
-    squareHeight = height/20;
-    SquareSet* squareSet = nullptr;
+    squareWidth = width/10;
+    squareHeight = height/10;
     squaresList = {};
-    gameOver = false;
+    init();
+};
+
+void Game::setGameSpeed(int speed) {
+    gameSpeed = speed;
+};
+
+int Game::getGameSpeed() const {
+    return gameSpeed;
 };
 
 bool Game::isGameOver() const {
@@ -49,7 +56,11 @@ void Game::setGameStatus(bool over) {
 };
 
 void Game::init() {
+    SquareSet* squareSet = nullptr;
     squaresList.clear();
+    setGameStatus(false);
+    setGameSpeed(2);
+    setScore(0);
 };
 
 void Game::update() {
@@ -96,7 +107,6 @@ void Game::update() {
                     squaresList.push_back(sq[i][j]);
                 }
             }
-            delete squareSet;
 
             for (Square* &s : squaresList) {
                 int y = s->getY();
@@ -107,12 +117,12 @@ void Game::update() {
                 }
             }
 
-            if (!isGameOver()) addSquareSet();
-            
+            deleteSquareSet();
+
         }
 
         if (!isGameOver()) {
-            squareSet->moveDown();
+            squareSet->moveDown(getGameSpeed());
 
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
@@ -141,13 +151,19 @@ void Game::update() {
 };
 
 void Game::addSquareSet() {
-    srand(time(NULL));
-    int randX = rand() % (width/squareWidth - 2);
-    // SquareSet newSquareSet = SquareSet(randX, 0);
-    // SquareSet newSquareSet = SquareSet(0, 0);
-    squareSet = new SquareSet(randX*(squareWidth), 0 - (squareHeight * 3));
-    squareSet->fill(squareWidth, squareHeight);
-    // squareSetsVector.push_back(newSquareSet);
+
+    if (!SquareSet::instanceActive) {
+
+        srand(time(NULL));
+        int randX = rand() % (width/squareWidth - 2);
+        // SquareSet newSquareSet = SquareSet(randX, 0);
+        // SquareSet newSquareSet = SquareSet(0, 0);
+        squareSet = new SquareSet(randX*(squareWidth), 0 - (squareHeight * 3));
+        squareSet->fill(squareWidth, squareHeight);
+        // squareSetsVector.push_back(newSquareSet);
+
+    }
+    
 };
 
 void Game::clearRow(int row, int perRow) {
@@ -198,6 +214,14 @@ void Game::clearRows() {
 
 };
 
+int Game::getScore() const {
+    return score;
+}
+
+void Game::increaseScore() {
+    setScore(getScore() + 1);
+}
+
 void Game::moveSquareSet(bool left) {
     if (!squareSet->nextToBorder(width, left))
         left ? squareSet->horizontalMovement(true) : squareSet->horizontalMovement(false);
@@ -207,9 +231,14 @@ void Game::rotateSquareSet() {
     squareSet->rotate();
 };
 
-void Game::deleteFigure() {
-
+void Game::deleteSquareSet() {
+    delete squareSet;
+    if (!isGameOver()) addSquareSet();
 };
+
+void Game::setScore(int newScore) {
+    score = newScore;
+}
 
 // emscripten::val Game::getSquareAtPostion(int position) {
 //     // string squareDescription = "y: " + to_string(squareSetsVector.at(position).getY());
