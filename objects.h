@@ -47,15 +47,14 @@ namespace G {
 
     class SquareSet: public GameObject {
         private:
-            bool empty;
             Square*** squaresArray;
             int numberOfSquares;
+            bool corrected;
                     
         public:
             static bool instanceActive;
             SquareSet(int startX, int startY);
             ~SquareSet();
-            bool isEmpty();
             void fill(int w, int h);
             Square*** getSquares();
             void moveDown(int speed);
@@ -85,6 +84,7 @@ namespace G {
             void addSquareSet();
             void deleteSquareSet();
             int getGameSpeed() const;
+            void increaseGameSpeed();
             void setGameSpeed(int speed);
             bool isGameOver() const;
             void setGameStatus(bool over);

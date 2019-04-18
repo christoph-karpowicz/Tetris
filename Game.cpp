@@ -39,6 +39,14 @@ Game::Game(int w, int h) {
     init();
 };
 
+void Game::increaseGameSpeed() {
+    int newSpeed = gameSpeed + 1;
+    while (newSpeed % gameSpeed != 0 || height % newSpeed != 0 || squareHeight % newSpeed != 0 || (height - squareHeight) % newSpeed != 0 || (height + (3 * squareHeight)) % newSpeed != 0) {
+        newSpeed++;
+    }
+    setGameSpeed(newSpeed);
+};
+
 void Game::setGameSpeed(int speed) {
     gameSpeed = speed;
 };
@@ -76,7 +84,8 @@ void Game::update() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (sq[i][j] != 0) {
-                    if (sq[i][j]->getY() == height - sq[i][j]->getHeight()) {
+                    int bottom = height - sq[i][j]->getHeight();
+                    if (sq[i][j]->getY() == bottom) {
                         reset = true;
                         goto resetConditionsMet;
                     }
@@ -103,8 +112,10 @@ void Game::update() {
         if (reset) {
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    sq[i][j]->setStill();
-                    squaresList.push_back(sq[i][j]);
+                    if (sq[i][j] != 0) {
+                        sq[i][j]->setStill();
+                        squaresList.push_back(sq[i][j]);
+                    }
                 }
             }
 
@@ -156,11 +167,8 @@ void Game::addSquareSet() {
 
         srand(time(NULL));
         int randX = rand() % (width/squareWidth - 2);
-        // SquareSet newSquareSet = SquareSet(randX, 0);
-        // SquareSet newSquareSet = SquareSet(0, 0);
         squareSet = new SquareSet(randX*(squareWidth), 0 - (squareHeight * 3));
         squareSet->fill(squareWidth, squareHeight);
-        // squareSetsVector.push_back(newSquareSet);
 
     }
     
@@ -188,6 +196,8 @@ void Game::clearRow(int row, int perRow) {
         
     }
 
+    increaseScore();
+
 };
 
 void Game::clearRows() {
@@ -201,7 +211,9 @@ void Game::clearRows() {
 
         for (Square* &s : squaresList) {
 
-            if (s->getY() == i * squareHeight) squaresFound++;
+            if (s->getY() == i * squareHeight) {
+                squaresFound++;
+            } 
             if (squaresFound == squaresPerRow) {
                 clearRow(i, squaresPerRow);
                 i = 0;
@@ -216,10 +228,13 @@ void Game::clearRows() {
 
 int Game::getScore() const {
     return score;
-}
+};
 
 void Game::increaseScore() {
     setScore(getScore() + 1);
+    if (getScore() % 1 == 0) {
+        increaseGameSpeed();
+    }
 }
 
 void Game::moveSquareSet(bool left) {

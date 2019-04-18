@@ -7,7 +7,6 @@
 // source ~/emsdk/emsdk_env.sh
 
 #include "objects.h"
-#include "SquareSetRotationFunctions.h"
 
 using namespace G;            
 
@@ -20,9 +19,9 @@ EMSCRIPTEN_BINDINGS() {
       .function("moveSquareSet", &Game::moveSquareSet)
       .function("rotateSquareSet", &Game::rotateSquareSet)
       // .function("getSquareAtPostion", &Game::getSquareAtPostion)
-      .function("update", &Game::update);  
+      .function("update", &Game::update);
 
-    emscripten::class_<GameObject>("GameObject")  
+    emscripten::class_<GameObject>("GameObject")
       .constructor<int, int>()
       // .property("y", &GameObject::getY, &GameObject::setY)
       .function("isStill", &GameObject::isStill)

@@ -1,4 +1,3 @@
-#include "SquareSetRotationFunctions.h"
 #include "objects.h"
 #include <time.h>  
 
@@ -15,7 +14,6 @@ SquareSet::SquareSet(int startX, int startY):
     std::srand(time(NULL));
     numberOfSquares = (std::rand() % 5) + 2;
 
-    empty = true;
     squaresArray = new Square**[3];
     for (int i = 0; i < 3; i++) {
         squaresArray[i] = new Square*[3];
@@ -24,10 +22,8 @@ SquareSet::SquareSet(int startX, int startY):
         }
     }
 
-};
+    corrected = false;
 
-bool SquareSet::isEmpty() {
-    return empty;
 };
 
 void SquareSet::fill(int w, int h) {
@@ -69,10 +65,25 @@ Square*** SquareSet::getSquares() {
 };
 
 void SquareSet::moveDown(int speed) {
+
+    if (!corrected) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (squaresArray[i][j] != 0) {
+                    while (squaresArray[i][j]->getY() % speed != 0) {
+                        squaresArray[i][j]->setY(squaresArray[i][j]->getY() + 1);
+                    }
+                }
+            }
+        }
+    }
+    
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            int oldY = squaresArray[i][j]->getY();
-            squaresArray[i][j]->setY(oldY + speed);
+            if (squaresArray[i][j] != 0) {
+                int oldY = squaresArray[i][j]->getY();
+                squaresArray[i][j]->setY(oldY + speed);
+            }
         }
     }
     y = y + speed;
@@ -119,9 +130,8 @@ void SquareSet::rotate() {
         }
     }
     
-    // srand(time(NULL));
-    // int rotationType = rand() % 4 + 1;
-    int rotationType = 3;
+    srand(time(NULL));
+    int rotationType = rand() % 4 + 1;
     switch (rotationType) {
         case 1:
             verticallySymetric(tmpSquaresArray, *this);

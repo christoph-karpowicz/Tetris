@@ -56,10 +56,10 @@ void G::deg90p(Square*** tmpArray, SquareSet& squareSet) {
         for (int j = 0; j < 3; j++) {
 
             if (squareSet.squaresArray[i][j] != 0) {
-                int newX = squareSet.getX() + (squareSet.squaresArray[i][j]->getWidth() * j);
+                int newX = squareSet.getX() + (squareSet.squaresArray[i][j]->getWidth() * k);
                 squareSet.squaresArray[i][j]->setX(newX);
                 
-                int newY = squareSet.getY() + (squareSet.squaresArray[i][j]->getHeight() * k);
+                int newY = squareSet.getY() + (squareSet.squaresArray[i][j]->getHeight() * j);
                 squareSet.squaresArray[i][j]->setY(newY);
                 
                 tmpArray[j][k] = squareSet.squaresArray[i][j];
@@ -76,10 +76,10 @@ void G::deg90m(Square*** tmpArray, SquareSet& squareSet) {
         for (int j = 0; j < 3; j++) {
 
             if (squareSet.squaresArray[i][j] != 0) {
-                int newX = squareSet.getX() + (squareSet.squaresArray[i][j]->getWidth() * j);
+                int newX = squareSet.getX() + (squareSet.squaresArray[i][j]->getWidth() * i);
                 squareSet.squaresArray[i][j]->setX(newX);
                 
-                int newY = squareSet.getY() + (squareSet.squaresArray[i][j]->getHeight() * i);
+                int newY = squareSet.getY() + (squareSet.squaresArray[i][j]->getHeight() * j);
                 squareSet.squaresArray[i][j]->setY(newY);
                 
                 tmpArray[j][i] = squareSet.squaresArray[i][j];
