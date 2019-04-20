@@ -86,6 +86,7 @@ void SquareSet::moveDown(int speed) {
             }
         }
     }
+    // correct y aswell?
     y = y + speed;
 }
 

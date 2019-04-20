@@ -19,6 +19,8 @@ EMSCRIPTEN_BINDINGS() {
       .function("moveSquareSet", &Game::moveSquareSet)
       .function("rotateSquareSet", &Game::rotateSquareSet)
       // .function("getSquareAtPostion", &Game::getSquareAtPostion)
+      .function("getState", &Game::getState)
+      .function("reset", &Game::reset)
       .function("update", &Game::update);
 
     emscripten::class_<GameObject>("GameObject")

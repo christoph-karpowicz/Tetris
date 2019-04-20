@@ -5,11 +5,78 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <style>
     body {
+        
+    }
+    .wrapper {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        grid-template-rows: auto;
+        grid-template-areas: "left center right";
+        padding-top: 10px;
+    }
+    .grid-left {
+        grid-area: left;
+    }
+    .grid-center {
+        grid-area: center;
         text-align: center;
+    }
+    .grid-right {
+        padding: 10px;
+        grid-area: right;
+    }
+    #game-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        grid-template-areas: 
+            "game game" 
+            "game-panel-left game-panel-right";
+        padding: 5px;
+        background-color: #000;
+        box-shadow: 0px 18px 18px #888888;
+        position: relative;
+    }
+    #game {
+        grid-area: game;
+    }
+    .panel {
+        color: #fff;
+    }
+    #game-panel-left {
+        grid-area: game-panel-left;
+    }
+    #game-panel-right {
+        grid-area: game-panel-right;
     }
     #g {
         margin: auto;
+        background-color: #fff;
         border: 1px solid #000;
+    }
+    #game-modal {
+        position: absolute;
+        border: 1px solid #000;
+        background-color: #fff;
+        padding: 20px;
+        top: 35%;
+        left: 32%;
+        display: none;
+    }
+    #game-modal > div {
+        font-size: 20px;
+        font-weight: bold;
+    }
+    #game-modal > button {
+        margin-top: 5px;
+        border: 1px solid #000;
+        background-color: #fff;
+        padding: 7px;
+    }
+    #game-modal > button:hover {
+        background-color: #000;
+        color: #fff;
+        cursor: pointer;
     }
 </style>
 </head>
@@ -18,52 +85,32 @@
     <input type="submit" name="submit" id="submit" />
 </form>
 <button id="send">tttt</button><br /> -->
-<canvas id="g" width="400" height="400"></canvas>
+<div class="wrapper">
+    <div class="grid-left">
+        
+    </div>
+    <div class="grid-center">
+        <div id="game-wrapper">
+            <div id="game">
+                <div id="game-modal">
+                    <div>GAME OVER</div>
+                    <button onclick="Module.reset()">Retry</button>
+                </div>
+                <canvas id="g"></canvas>
+            </div>
+            <div id="game-panel-left" class="panel">
+                Score: <span id="score">0</span>
+            </div>
+            <div id="game-panel-right" class="panel">
+
+            </div>
+        </div>
+    </div>
+    <div class="grid-right">
+        Leaderboard:
+    </div>
+</div>
 <script>
-
-var Module = {
-    onRuntimeInitialized: function() {
-
-        const game = new Module.Game(400, 400);
-        game.addSquareSet();
-        // game.addSquareSet();
-
-        requestAnimationFrame(function f() {
-            game.update();
-            requestAnimationFrame(f);
-        });
-        // console.log(game.getSquareAtPostion(0));
-
-        let c = document.querySelector('canvas');              
-        c.onclick = function(e) {
-            console.log(e.clientX, e.clientY)
-            // ball.move(e.clientX, e.clientY);
-            // ball.update();
-        };
-
-        $(document).keypress(function(e) {
-            switch (e.keyCode) {
-                case 97:
-                    game.moveSquareSet(true);
-                    break;
-                case 100:
-                    game.moveSquareSet(false);
-                    break;
-                case 119:
-                    game.rotateSquareSet();
-                    break;
-            }
-        });
-
-    },
-    preRun: [function() {
-        // const update = cwrap('update', null, []);
-        // requestAnimationFrame(function f() {
-        //     // update();
-        //     requestAnimationFrame(f);
-        // });
-    }],
-};
 
 $('#submit').submit((e) => {
     e.preventDefault();
@@ -93,62 +140,97 @@ $('#send').on('click', (e) => {
     });
 });
 
-class G {
+class Game {
 
     constructor(args) {
         this.width = args.width;
         this.height = args.height;
-        this.division = args.division;
+        this.gameOver = false;
+        this.score = 0;
+    }
+
+    getScore() {
+        return this.score;
+    }
+
+    init() {
+        $('#g').attr({
+            "width": this.width,
+            "height": this.height
+        });
+        this.setKeyBindings();
+    }
+
+    isGameOver() {
+        return this.gameOver;
+    }
+
+    onRuntimeInitialized() {
+
+        this.gameInstance = new Module.Game(this.width, this.height);
+
+        let self = this;
+
+        requestAnimationFrame(function f() {
+            self.gameInstance.update();
+            requestAnimationFrame(f);
+            self.parseState();
+        });
+
+    }
+
+    parseState() {
+        let state = this.gameInstance.getState();
+        this.setGameOver(state.isGameOver);
+        this.setScore(state.score);
+    }
+
+    reset() {
+        console.log('aaa');
+        this.gameInstance.reset();
+    }
+
+    setGameOver(val) {
+        if (!this.gameOver && val) {
+            $("#game-modal").css("display", "block");
+        } 
+        if (this.gameOver && !val) {
+            $("#game-modal").css("display", "none");
+        }
+        this.gameOver = val;
+    }
+
+    setKeyBindings() {
+        let self = this;
+        $(document).keypress(function(e) {
+            switch (e.keyCode) {
+                case 97:
+                    self.gameInstance.moveSquareSet(true);
+                    break;
+                case 100:
+                    self.gameInstance.moveSquareSet(false);
+                    break;
+                case 119:
+                    self.gameInstance.rotateSquareSet();
+                    break;
+            }
+        });
+    }
+
+    setScore(newScore) {
+        this.score = newScore;
+        $("#score").html(this.score);
     }
 
 }
 
-class Piece {
-
-    constructor(args) {
-        this.x = args.x;
-        this.y = args.y;
-        this.speed = args.speed;
-    }
-    
-}
-
-$(document).ready(function() {
-    let gameObject = new G({
-        width: 500,
-        height: 500,
-        division: 50
+var Module = new Game({
+        width: 400,
+        height: 400
     });
-});
-    
+Module.init();
+
 </script>
 <script src="app.js"></script>
-<script>
-    Module.addOnPostRun(() => {
-
-        // const main = new Module.Main(11);
-        // console.log(main.showi());
-        // main.set_j(12);
-        // console.log(main.get_j());
-
-        // const update = Module.update();
-        // update();
-
-    });
-
-    // WebAssembly.instantiateStreaming(fetch('a.out.wasm'))
-    // .then(function(results) {
-    //     console.log(results.instance.exports);
-    //     // console.log(results.instance.exports.__Z7squareri(11111));
-    //     // var showi = results.instance.exports.showi;
-    //     // var tbl = results.instance.exports.tbl;
-    //     // console.log(tbl.get(0)());  // 13
-    //     // console.log(tbl.get(1)());  // 42
-    //     // let c = document.getElementById('canvas');
-    //     // c.onclick = function () {
-    //     //     console.log(showi(2)());  // 13
-    //     // };
-    // });
-</script>
 </body>
 </html>

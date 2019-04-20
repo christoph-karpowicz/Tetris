@@ -93,7 +93,9 @@ namespace G {
             int getScore() const;
             void setScore(int newScore);
             void increaseScore();
+            void reset();
             // emscripten::val getSquareAtPostion(int position);
+            emscripten::val getState();
     };
 
     void verticallySymetric(Square*** tmpArray, SquareSet& squareSet);

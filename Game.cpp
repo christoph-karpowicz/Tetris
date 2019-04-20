@@ -77,6 +77,8 @@ void Game::update() {
 
     if (!isGameOver()) {
 
+        if (!SquareSet::instanceActive) addSquareSet();
+
         clearRows();
         
         Square*** sq = squareSet->getSquares(); 
@@ -235,11 +237,15 @@ void Game::increaseScore() {
     if (getScore() % 1 == 0) {
         increaseGameSpeed();
     }
-}
+};
 
 void Game::moveSquareSet(bool left) {
     if (!squareSet->nextToBorder(width, left))
         left ? squareSet->horizontalMovement(true) : squareSet->horizontalMovement(false);
+};
+
+void Game::reset() {
+    init();
 };
 
 void Game::rotateSquareSet() {
@@ -253,7 +259,14 @@ void Game::deleteSquareSet() {
 
 void Game::setScore(int newScore) {
     score = newScore;
-}
+};
+
+emscripten::val Game::getState() {
+    emscripten::val returnVal = emscripten::val::object();
+    returnVal.set("isGameOver", emscripten::val(isGameOver()));
+    returnVal.set("score", emscripten::val(getScore()));
+    return returnVal;
+};
 
 // emscripten::val Game::getSquareAtPostion(int position) {
 //     // string squareDescription = "y: " + to_string(squareSetsVector.at(position).getY());
