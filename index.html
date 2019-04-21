@@ -80,11 +80,7 @@
     }
 </style>
 </head>
-<!-- <form>
-    Test: <input type="text" name="test" />
-    <input type="submit" name="submit" id="submit" />
-</form>
-<button id="send">tttt</button><br /> -->
+<button id="send">tttt</button><br />
 <div class="wrapper">
     <div class="grid-left">
         
@@ -108,35 +104,36 @@
     </div>
     <div class="grid-right">
         Leaderboard:
+        <table id="leaderboard">
+            <tr>
+                <th>Name</th>
+                <th>Score</th>
+                <th>Since</th>
+            </tr>
+        </table>
     </div>
 </div>
 <script>
 
-$('#submit').submit((e) => {
-    e.preventDefault();
-    console.log('ssssss');
-    $.ajax({
-        method: "GET",
-        url: "/",
-        data: {
-            test: "ttttttttttttt"
-        }
-    }).done(() => {
-        console.log('aaaaaaa');
-    });
-});
-
 $('#send').on('click', (e) => {
     e.preventDefault();
-    console.log('ssssss');
     $.ajax({
         method: "GET",
         url: "/",
         data: {
-            test: "ttttttttttttt"
+            insertIntoLeaderboard: "1",
+            name: "test1",
+            score: 3,
+            added: "2019-04-22"
+        },
+        success: function(res) {
+            console.log(res);
+            // let response = JSON.parse(res);
+            // console.log(response);
+        },
+        error: function(res) {
+            console.log(res);
         }
-    }).done((res) => {
-        console.log(res);
     });
 });
 
@@ -149,6 +146,45 @@ class Game {
         this.score = 0;
     }
 
+    getLeaderboard() {
+
+        $.ajax({
+            method: "GET",
+            url: "/",
+            data: {
+                getLeaderboard: "1"
+            },
+            success: function(res) {
+                
+                $(".leaderboard-record").remove();
+                
+                let response = JSON.parse(res),
+                    leaderboard = response.leaderboard,
+                    leaderboardTable = $("#leaderboard");
+
+                leaderboard.pop();
+
+                leaderboard.forEach(record => {
+
+                    let tr = $("<tr/>").attr("class", "leaderboard-record"),
+                        scoreTd = $("<td/>").html(record.score),
+                        nameTd = $("<td/>").html(record.name),
+                        addedTd = $("<td/>").html(record.added.replace(/\s\d+:\d+:\d+/, ''));
+                    $(tr).append(scoreTd, nameTd, addedTd);
+
+                    $(leaderboardTable).append(tr);
+                    // console.log(record);
+
+                });
+                
+            },
+            error: function(res) {
+                console.log(res);
+            }
+        });
+   
+    }
+
     getScore() {
         return this.score;
     }
@@ -159,6 +195,7 @@ class Game {
             "height": this.height
         });
         this.setKeyBindings();
+        this.getLeaderboard();
     }
 
     isGameOver() {
@@ -188,6 +225,7 @@ class Game {
     reset() {
         console.log('aaa');
         this.gameInstance.reset();
+        this.getLeaderboard();
     }
 
     setGameOver(val) {

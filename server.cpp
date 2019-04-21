@@ -11,6 +11,12 @@
 #include <evhttp.h>
 #include <cassert>
 #include <string>
+#include <string.h>
+#include <vector>
+
+#include <sqlite3.h>
+#include "DB.h"
+#include "Callback.h"
 
 #ifdef _WIN32
 #ifndef stat
@@ -31,6 +37,8 @@
 #endif
 
 using namespace std;
+using namespace Database;
+using namespace Callback;
 
 enum class URI_TO_PATH_STATUS : std::int8_t {
   SUCCESS = 0,
@@ -84,9 +92,17 @@ end:
   return result;
 }
 
+void test(vector<LeaderboardRecord> &drv) {
+  LeaderboardRecord lr;
+  lr.name = "aaaa";
+  lr.score = "15";
+  lr.added = "asdasd";
+  drv.push_back(lr);
+}
+
 int main()
 {
-// g++ server.cpp -levent
+// g++ server.cpp DB.cpp Callback.cpp -levent -l sqlite3
 
   if (!event_init())
   {
@@ -119,9 +135,15 @@ int main()
     struct evkeyvalq headers;
     const char *getParam;
     // Parse the query for later lookups
-    evhttp_parse_query (uri, &headers);
+    evhttp_parse_query(uri, &headers);
 
-    getParam = evhttp_find_header(&headers, "test");
+    DB* db = new DB();
+    db->init();
+    vector<LeaderboardRecord> leaderboardDBRecords;
+    leaderboardDBRecords = {};
+    string response = "{ ";
+
+    // getParam = evhttp_find_header(&headers, "test");
     std::cout << path << std::endl;
     std::cout << "Got decoded path " << path << std::endl;
     // printf("%s\n", q);
@@ -130,119 +152,157 @@ int main()
     if (!OutBuf)
       return;
 
-    if (getParam != NULL) {
+    if (evhttp_find_header(&headers, "test") != NULL) {
 
+      getParam = evhttp_find_header(&headers, "test");
       std::cout << "GET " << getParam << std::endl;
       evbuffer_add_printf(OutBuf, "{test: \"tt\"}");
-
-    }
-        
-    if (path == "/test.js") {
-      struct evbuffer *evb = NULL;
-      struct stat st;
-      evb = evbuffer_new();
-
-      int fd = -1;
-      if ((fd = open("test.js", O_RDONLY)) < 0) {
-        // perror("open");
-        // goto err;
-      }
-
-      if (fstat(fd, &st)<0) {
-        /* Make sure the length still matches, now that we
-        * opened the file :/ */
-        // perror("fstat");
-        // goto err;
-      }
-
-      evbuffer_add_file(evb, fd, 0, st.st_size);  
-      evhttp_add_header(evhttp_request_get_output_headers(req),
-        "Content-Type", "text/javascript");
-      evhttp_send_reply(req, HTTP_OK, "", evb);
-
-    }
-    else if (path == "/app.js") {
-      struct evbuffer *evb = NULL;
-      struct stat st;
-      evb = evbuffer_new();
-
-      int fd = -1;
-      if ((fd = open("app.js", O_RDONLY)) < 0) {
-        // perror("open");
-        // goto err;
-      }
-
-      if (fstat(fd, &st)<0) {
-        /* Make sure the length still matches, now that we
-        * opened the file :/ */
-        // perror("fstat");
-        // goto err;
-      }
-
-      evbuffer_add_file(evb, fd, 0, st.st_size);  
-      evhttp_add_header(evhttp_request_get_output_headers(req),
-        "Content-Type", "text/javascript");
-      evhttp_send_reply(req, HTTP_OK, "", evb);
-    }
-    else if (path == "/app.wasm") {
-      struct evbuffer *evb = NULL;
-      struct stat st;
-      evb = evbuffer_new();
-
-      int fd = -1;
-      if ((fd = open("app.wasm", O_RDONLY)) < 0) {
-        // perror("open");
-        // goto err;
-      }
-
-      if (fstat(fd, &st)<0) {
-        /* Make sure the length still matches, now that we
-        * opened the file :/ */
-        // perror("fstat");
-        // goto err;
-      }
-
-      evbuffer_add_file(evb, fd, 0, st.st_size);  
-      evhttp_add_header(evhttp_request_get_output_headers(req),
-        "Content-Type", "application/wasm");
-      evhttp_send_reply(req, HTTP_OK, "", evb);
-    }
-    else {
-
-      /** 
-       * Get the contents of the HTML file.
-      */
-      string singleLine, fileContent;
-
-      // open a file in read mode.
-      ifstream indexFile; 
-      indexFile.open("index.html"); 
-
-      while (getline(indexFile, singleLine)) {
-        fileContent.append(singleLine);
-        fileContent.append("\n");
-      }
-
-      // close the opened file.
-      indexFile.close();
-
-      // Convert HTML string into char array. 
-      char fileContentToChar[fileContent.size() + 1];
-      fileContent.copy(fileContentToChar, fileContent.size() + 1);
-      fileContentToChar[fileContent.size()] = '\0';
-      
-      evbuffer_add_printf(OutBuf, fileContentToChar);
-
-      evhttp_add_header(evhttp_request_get_output_headers(req),
-        "Content-Type", "text/html");
       evhttp_send_reply(req, HTTP_OK, "", OutBuf);
-      // evbuffer_add_printf(OutBuf, "%s", q);
 
-      // evhttp_add_header(evhttp_request_get_output_headers(req),
-      //   "Content-Type", "application/wasm");
+    }
+    else if (evhttp_find_header(&headers, "getLeaderboard") != NULL) {
+
+      response = response + " \"leaderboard\": [";
+      db->select(leaderboardDBRecords);
+      // test(leaderboardDBRecords);
+      for (LeaderboardRecord lr : leaderboardDBRecords) {
+        response = response + " { ";
+        response = response + " \"name\": \"" + lr.name + "\", ";
+        response = response + " \"score\": \"" + lr.score + "\", ";
+        response = response + " \"added\": \"" + lr.added + "\"";
+        // cout << "name: " << lr.name << " | score: " << lr.score << " | added: " << lr.added << endl;
+        response = response + " }, ";
+      }
+      leaderboardDBRecords.clear();
+      // delete leaderboardDBRecords;
+      response = response + "\"e\" ] }";
+      evbuffer_add_printf(OutBuf, response.c_str());
+      evhttp_send_reply(req, HTTP_OK, "", OutBuf);
+    }
+
+    else if (evhttp_find_header(&headers, "insertIntoLeaderboard") != NULL) {
+
+      string name = evhttp_find_header(&headers, "name");
+      string score = evhttp_find_header(&headers, "score");
+      string added = evhttp_find_header(&headers, "added");
+      // cout << name << endl;
+      db->insert(name, score, added);
+
+      response = "ok";
+      evbuffer_add_printf(OutBuf, response.c_str());
+      evhttp_send_reply(req, HTTP_OK, "", OutBuf);
+
+    } else {
+      if (path == "/test.js") {
+        struct evbuffer *evb = NULL;
+        struct stat st;
+        evb = evbuffer_new();
+
+        int fd = -1;
+        if ((fd = open("test.js", O_RDONLY)) < 0) {
+          // perror("open");
+          // goto err;
+        }
+
+        if (fstat(fd, &st)<0) {
+          /* Make sure the length still matches, now that we
+          * opened the file :/ */
+          // perror("fstat");
+          // goto err;
+        }
+
+        evbuffer_add_file(evb, fd, 0, st.st_size);  
+        evhttp_add_header(evhttp_request_get_output_headers(req),
+          "Content-Type", "text/javascript");
+        evhttp_send_reply(req, HTTP_OK, "", evb);
+
+      }
+      else if (path == "/app.js") {
+        struct evbuffer *evb = NULL;
+        struct stat st;
+        evb = evbuffer_new();
+
+        int fd = -1;
+        if ((fd = open("app.js", O_RDONLY)) < 0) {
+          // perror("open");
+          // goto err;
+        }
+
+        if (fstat(fd, &st)<0) {
+          /* Make sure the length still matches, now that we
+          * opened the file :/ */
+          // perror("fstat");
+          // goto err;
+        }
+
+        evbuffer_add_file(evb, fd, 0, st.st_size);
+        evhttp_add_header(evhttp_request_get_output_headers(req),
+          "Content-Type", "text/javascript");
+        evhttp_send_reply(req, HTTP_OK, "", evb);
+      }
+      else if (path == "/app.wasm") {
+        struct evbuffer *evb = NULL;
+        struct stat st;
+        evb = evbuffer_new();
+
+        int fd = -1;
+        if ((fd = open("app.wasm", O_RDONLY)) < 0) {
+          // perror("open");
+          // goto err;
+        }
+
+        if (fstat(fd, &st)<0) {
+          /* Make sure the length still matches, now that we
+          * opened the file :/ */
+          // perror("fstat");
+          // goto err;
+        }
+
+        evbuffer_add_file(evb, fd, 0, st.st_size);  
+        evhttp_add_header(evhttp_request_get_output_headers(req),
+          "Content-Type", "application/wasm");
+        evhttp_send_reply(req, HTTP_OK, "", evb);
+      }
+      else if (path == "/") {
+
+        /** 
+         * Get the contents of the HTML file.
+        */
+        string singleLine, fileContent;
+
+        // open a file in read mode.
+        ifstream indexFile; 
+        indexFile.open("index.html"); 
+
+        while (getline(indexFile, singleLine)) {
+          fileContent.append(singleLine);
+          fileContent.append("\n");
+        }
+
+        // close the opened file.
+        indexFile.close();
+
+        // Convert HTML string into char array. 
+        char fileContentToChar[fileContent.size() + 1];
+        fileContent.copy(fileContentToChar, fileContent.size() + 1);
+        fileContentToChar[fileContent.size()] = '\0';
+        
+        evbuffer_add_printf(OutBuf, fileContentToChar);
+
+        evhttp_add_header(evhttp_request_get_output_headers(req),
+          "Content-Type", "text/html");
+        evhttp_send_reply(req, HTTP_OK, "", OutBuf);
+        // evbuffer_add_printf(OutBuf, "%s", q);
+
+        // evhttp_add_header(evhttp_request_get_output_headers(req),
+        //   "Content-Type", "application/wasm");
+
+      }
 
     }
 
+    delete db;
+        
   };
 
   evhttp_set_gencb(Server.get(), OnReq, nullptr);
