@@ -106,8 +106,8 @@
         Leaderboard:
         <table id="leaderboard">
             <tr>
-                <th>Name</th>
                 <th>Score</th>
+                <th>Name</th>
                 <th>Since</th>
             </tr>
         </table>
@@ -121,7 +121,8 @@ $('#send').on('click', (e) => {
         method: "GET",
         url: "/",
         data: {
-            insertIntoLeaderboard: "1",
+            // insertIntoLeaderboard: "1",
+            test: "1",
             name: "test1",
             score: 3,
             added: "2019-04-22"
@@ -223,7 +224,6 @@ class Game {
     }
 
     reset() {
-        console.log('aaa');
         this.gameInstance.reset();
         this.getLeaderboard();
     }
