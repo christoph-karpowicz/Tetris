@@ -11,7 +11,7 @@ namespace Callback {
         score,
         added
     };
-    static std::map<std::string, columnNames> columns =
+    static const std::map<std::string, columnNames> columns =
     {
         { "name", columnNames::name },
         { "score", columnNames::score },

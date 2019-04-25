@@ -54,29 +54,44 @@
         background-color: #fff;
         border: 1px solid #000;
     }
-    #game-modal {
+    .game-modal {
         position: absolute;
         border: 1px solid #000;
         background-color: #fff;
         padding: 20px;
-        top: 35%;
-        left: 32%;
-        display: none;
     }
-    #game-modal > div {
+    .game-modal > div {
         font-size: 20px;
         font-weight: bold;
     }
-    #game-modal > button {
+    .game-modal > button {
         margin-top: 5px;
         border: 1px solid #000;
         background-color: #fff;
         padding: 7px;
     }
-    #game-modal > button:hover {
+    .game-modal > button:hover {
         background-color: #000;
         color: #fff;
         cursor: pointer;
+    }
+    #start-modal {
+        z-index: 3;
+        top: 35%;
+        left: 32%;
+        display: block;
+    }
+    #gameOver-modal {
+        z-index: 3;
+        top: 35%;
+        left: 32%;
+        display: none;
+    }
+    #highScore-modal {
+        z-index: 4;
+        top: 30%;
+        left: 6%;
+        display: none;
     }
 </style>
 </head>
@@ -88,9 +103,18 @@
     <div class="grid-center">
         <div id="game-wrapper">
             <div id="game">
-                <div id="game-modal">
+                <div class="game-modal" id="start-modal">
+                    <div>NEW GAME</div>
+                    <button onclick="Module.start()">Start</button>
+                </div>
+                <div class="game-modal" id="gameOver-modal">
                     <div>GAME OVER</div>
                     <button onclick="Module.reset()">Retry</button>
+                </div>
+                <div class="game-modal" id="highScore-modal">
+                    <div>NEW HIGH SCORE</div>
+                    Name: <input id="newHighScoreNameInput" type="text" />
+                    <button onclick="Module.setNewHighScore()">Sumbit score</button>
                 </div>
                 <canvas id="g"></canvas>
             </div>
@@ -121,9 +145,9 @@ $('#send').on('click', (e) => {
         method: "GET",
         url: "/",
         data: {
-            // insertIntoLeaderboard: "1",
-            test: "1",
-            name: "test1",
+            insertIntoLeaderboard: "1",
+            // test: "1",
+            name: "test2",
             score: 3,
             added: "2019-04-22"
         },
@@ -145,9 +169,12 @@ class Game {
         this.height = args.height;
         this.gameOver = false;
         this.score = 0;
+        this.leaderboard = null;
     }
 
     getLeaderboard() {
+
+        let self = this;
 
         $.ajax({
             method: "GET",
@@ -165,8 +192,11 @@ class Game {
 
                 leaderboard.pop();
 
-                leaderboard.forEach(record => {
+                leaderboard.forEach((record, i) => {
 
+                    // Show only 10 results. 
+                    if (i > 9) return;
+                    
                     let tr = $("<tr/>").attr("class", "leaderboard-record"),
                         scoreTd = $("<td/>").html(record.score),
                         nameTd = $("<td/>").html(record.name),
@@ -174,9 +204,10 @@ class Game {
                     $(tr).append(scoreTd, nameTd, addedTd);
 
                     $(leaderboardTable).append(tr);
-                    // console.log(record);
 
                 });
+
+                self.leaderboard = leaderboard;
                 
             },
             error: function(res) {
@@ -203,6 +234,11 @@ class Game {
         return this.gameOver;
     }
 
+    isNewHighScore() {
+        // console.log(this.score, Number(this.leaderboard[0].score));
+        return this.score > (this.leaderboard.length > 0 ? Number(this.leaderboard[0].score) : 0);
+    }
+
     onRuntimeInitialized() {
 
         this.gameInstance = new Module.Game(this.width, this.height);
@@ -219,8 +255,8 @@ class Game {
 
     parseState() {
         let state = this.gameInstance.getState();
-        this.setGameOver(state.isGameOver);
         this.setScore(state.score);
+        this.setGameOver(state.isGameOver);
     }
 
     reset() {
@@ -230,10 +266,13 @@ class Game {
 
     setGameOver(val) {
         if (!this.gameOver && val) {
-            $("#game-modal").css("display", "block");
+            if (this.isNewHighScore()) {
+                $("#highScore-modal").css("display", "block");
+            }
+            $("#gameOver-modal").css("display", "block");
         } 
         if (this.gameOver && !val) {
-            $("#game-modal").css("display", "none");
+            $("#gameOver-modal").css("display", "none");
         }
         this.gameOver = val;
     }
@@ -243,21 +282,50 @@ class Game {
         $(document).keypress(function(e) {
             switch (e.keyCode) {
                 case 97:
-                    self.gameInstance.moveSquareSet(true);
+                    !self.gameOver && self.gameInstance.moveSquareSet(true);
                     break;
                 case 100:
-                    self.gameInstance.moveSquareSet(false);
+                    !self.gameOver && self.gameInstance.moveSquareSet(false);
                     break;
                 case 119:
-                    self.gameInstance.rotateSquareSet();
+                    !self.gameOver && self.gameInstance.rotateSquareSet();
                     break;
             }
         });
     }
 
+    setNewHighScore() {
+            
+        let self = this;
+            
+        $.ajax({
+            method: "GET",
+            url: "/",
+            data: {
+                insertIntoLeaderboard: "1",
+                name: $("#newHighScoreNameInput").val() != "" ? $("#newHighScoreNameInput").val() : "Unknown player",
+                score: self.score,
+                added: new Date().toJSON().slice(0,10)
+            },
+            success: function(res) {
+                $("#highScore-modal").css("display", "none");
+                self.getLeaderboard();
+            },
+            error: function(res) {
+                console.log(res);
+            }
+        });
+
+    }
+
     setScore(newScore) {
         this.score = newScore;
         $("#score").html(this.score);
+    }
+
+    start() {
+        this.gameInstance.setIsStopped(false);
+        $("#start-modal").css("display", "none");
     }
 
 }

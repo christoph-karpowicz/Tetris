@@ -30,13 +30,10 @@ EM_JS(void, dump, (string data), {
 using namespace G;
 using namespace std;
 
-Game::Game(int w, int h) {
-    width = w;
-    height = h;
-    squareWidth = width/10;
-    squareHeight = height/10;
+Game::Game(const int w, const int h): width(w), height(h), squareWidth(w/10), squareHeight(height/10) {
     squaresList = {};
     init();
+    setIsStopped(true);
 };
 
 void Game::increaseGameSpeed() {
@@ -47,7 +44,7 @@ void Game::increaseGameSpeed() {
     setGameSpeed(newSpeed);
 };
 
-void Game::setGameSpeed(int speed) {
+void Game::setGameSpeed(const int speed) {
     gameSpeed = speed;
 };
 
@@ -59,7 +56,7 @@ bool Game::isGameOver() const {
     return gameOver;
 };
 
-void Game::setGameStatus(bool over) {
+void Game::setGameStatus(const bool over) {
     gameOver = over;
 };
 
@@ -72,6 +69,9 @@ void Game::init() {
 };
 
 void Game::update() {
+
+    if (stopped) return;
+        
     bool reset = false;
     clearCanvas();
 
@@ -81,13 +81,11 @@ void Game::update() {
 
         clearRows();
         
-        Square*** sq = squareSet->getSquares(); 
-
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                if (sq[i][j] != 0) {
-                    int bottom = height - sq[i][j]->getHeight();
-                    if (sq[i][j]->getY() == bottom) {
+                if ((*squareSet)[i][j] != 0) {
+                    int bottom = height - (*squareSet)[i][j]->getHeight();
+                    if ((*squareSet)[i][j]->getY() == bottom) {
                         reset = true;
                         goto resetConditionsMet;
                     }
@@ -99,8 +97,8 @@ void Game::update() {
 
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    if (sq[i][j] != 0) {
-                        if (sq[i][j]->getY() + sq[i][j]->getHeight() == s->getY() && sq[i][j]->getX() == s->getX()) {
+                    if ((*squareSet)[i][j] != 0) {
+                        if ((*squareSet)[i][j]->getY() + (*squareSet)[i][j]->getHeight() == s->getY() && (*squareSet)[i][j]->getX() == s->getX()) {
                             reset = true;
                             goto resetConditionsMet;
                         }
@@ -114,9 +112,9 @@ void Game::update() {
         if (reset) {
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    if (sq[i][j] != 0) {
-                        sq[i][j]->setStill();
-                        squaresList.push_back(sq[i][j]);
+                    if ((*squareSet)[i][j] != 0) {
+                        (*squareSet)[i][j]->setStill();
+                        squaresList.push_back((*squareSet)[i][j]);
                     }
                 }
             }
@@ -135,15 +133,15 @@ void Game::update() {
         }
 
         if (!isGameOver()) {
-            squareSet->moveDown(getGameSpeed());
+            (*squareSet) >> getGameSpeed();
 
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    if (sq[i][j] != 0) {
-                        int x = sq[i][j]->getX();
-                        int y = sq[i][j]->getY();
-                        int w = sq[i][j]->getWidth();
-                        int h = sq[i][j]->getHeight();
+                    if ((*squareSet)[i][j] != 0) {
+                        int x = (*squareSet)[i][j]->getX();
+                        int y = (*squareSet)[i][j]->getY();
+                        int w = (*squareSet)[i][j]->getWidth();
+                        int h = (*squareSet)[i][j]->getHeight();
                         drawSquare(x, y, w, h);
                     }
                 }
@@ -163,7 +161,7 @@ void Game::update() {
 
 };
 
-void Game::addSquareSet() {
+void Game::addSquareSet() const {
 
     if (!SquareSet::instanceActive) {
 
@@ -176,7 +174,7 @@ void Game::addSquareSet() {
     
 };
 
-void Game::clearRow(int row, int perRow) {
+void Game::clearRow(const int row, const int perRow) {
 
     for (auto it = squaresList.begin(); it != squaresList.end(); ) {
 
@@ -239,29 +237,33 @@ void Game::increaseScore() {
     }
 };
 
-void Game::moveSquareSet(bool left) {
+void Game::moveSquareSet(const bool left) {
     if (!squareSet->nextToBorder(width, left))
-        left ? squareSet->horizontalMovement(true) : squareSet->horizontalMovement(false);
+        left ? ++(*squareSet) : (*squareSet)++;
 };
 
 void Game::reset() {
     init();
 };
 
-void Game::rotateSquareSet() {
+void Game::rotateSquareSet() const {
     squareSet->rotate();
 };
 
-void Game::deleteSquareSet() {
+void Game::deleteSquareSet() const {
     delete squareSet;
     if (!isGameOver()) addSquareSet();
 };
 
-void Game::setScore(int newScore) {
+void Game::setScore(const int newScore) {
     score = newScore;
 };
 
-emscripten::val Game::getState() {
+void Game::setIsStopped(const bool val) {
+    stopped = val;
+};
+
+emscripten::val Game::getState() const {
     emscripten::val returnVal = emscripten::val::object();
     returnVal.set("isGameOver", emscripten::val(isGameOver()));
     returnVal.set("score", emscripten::val(getScore()));

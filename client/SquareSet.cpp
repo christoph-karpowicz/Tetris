@@ -5,7 +5,7 @@ using namespace G;
 
 bool SquareSet::instanceActive = false;
 
-SquareSet::SquareSet(int startX, int startY):
+SquareSet::SquareSet(const int startX, const int startY):
     GameObject(startX, startY)
 {
 
@@ -26,7 +26,7 @@ SquareSet::SquareSet(int startX, int startY):
 
 };
 
-void SquareSet::fill(int w, int h) {
+void SquareSet::fill(const int w, const int h) {
     int squaresCreated = 0;
     int randRow, randCol;
 
@@ -60,11 +60,11 @@ void SquareSet::fill(int w, int h) {
     }
 };
 
-Square*** SquareSet::getSquares() {
+Square*** SquareSet::getSquares() const {
     return squaresArray;
 };
 
-void SquareSet::moveDown(int speed) {
+SquareSet& SquareSet::operator>>(const int speed) {
 
     if (!corrected) {
         for (int i = 0; i < 3; i++) {
@@ -88,17 +88,21 @@ void SquareSet::moveDown(int speed) {
     }
     // correct y aswell?
     y = y + speed;
+
+    return *this;
+
 }
 
-void SquareSet::horizontalMovement(bool left) {
+void SquareSet::horizontalMovement(const bool left) {
     int squareWidth = 0;
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             if (squaresArray[i][j] != 0) {
-                if (left)
-                    squaresArray[i][j]->horizontalMovement(true);
+                if (left) {
+                    ++(*squaresArray[i][j]);
+                }
                 else 
-                    squaresArray[i][j]->horizontalMovement(false);
+                    (*squaresArray[i][j])++;
                 if (squareWidth == 0) squareWidth = squaresArray[i][j]->getWidth();
             }
         }
@@ -107,7 +111,7 @@ void SquareSet::horizontalMovement(bool left) {
     setX(x + change);
 };
 
-bool SquareSet::nextToBorder(int w, bool left) {
+bool SquareSet::nextToBorder(const int w, const bool left) const {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             if (squaresArray[i][j] != 0) {
@@ -157,12 +161,23 @@ void SquareSet::rotate() {
 
 };
 
+SquareSet& SquareSet::operator++() {
+    horizontalMovement(true);
+    return *this;
+};
+
+SquareSet& SquareSet::operator++(int) {
+    horizontalMovement(false);
+    return *this;
+};
+
+Square** SquareSet::operator[](const int row) const {
+    return squaresArray[row];
+};
+
 SquareSet::~SquareSet()
 {
 
     SquareSet::instanceActive = false;
-    // if (!isEmpty()) {
-    //     delete square;
-    // }
 
 };

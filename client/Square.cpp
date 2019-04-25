@@ -2,7 +2,7 @@
 
 using namespace G;
 
-Square::Square(int startX, int startY, int w, int h): 
+Square::Square(const int startX, const int startY, const int w, const int h): 
     GameObject(startX, startY),
     width(w),
     height(h) 
@@ -10,13 +10,7 @@ Square::Square(int startX, int startY, int w, int h):
     active = false;
 };
 
-emscripten::val Square::getYY() const {
-    emscripten::val returnVal = emscripten::val::object();
-    returnVal.set("y", emscripten::val(y));
-    return returnVal;
-}
-
-void Square::horizontalMovement(bool left) {
+void Square::horizontalMovement(const bool left) {
     int change = left ? width * (-1) : width;
     setX(x + change);
 };
@@ -29,7 +23,17 @@ int Square::getHeight() const {
     return height;
 };
 
-int* Square::bottomRightCoordinates() {
+int* Square::bottomRightCoordinates() const {
     int coordinates[2] = {x + width, y + height};
     return coordinates;
 }
+
+Square& Square::operator++() {
+    horizontalMovement(true);
+    return *this;
+};
+
+Square& Square::operator++(int) {
+    horizontalMovement(false);
+    return *this;
+};

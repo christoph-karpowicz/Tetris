@@ -12,14 +12,13 @@ using namespace Database;
 using namespace std;
 
 int Callback::selection(void *data, int argc, char **argv, char **azColName) {
-    int i;
     vector<LeaderboardRecord>* res = static_cast<vector<LeaderboardRecord>*>(data);
    
     LeaderboardRecord lr;
-    for (i = 0; i < argc; i++) {
+    for (int i = 0; i < argc; i++) {
         // printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-        string col = azColName[i];
-        switch (columns[col]) {
+        const string col = azColName[i];
+        switch (columns.at(col)) {
             case columnNames::name:
                 lr.name = argv[i] ? argv[i] : "NULL";
                 break;
@@ -34,16 +33,14 @@ int Callback::selection(void *data, int argc, char **argv, char **azColName) {
     }
     res->push_back(lr);
     
-    printf("\n");
-
     return 0;
 };
 
 int Callback::insertion(void *data, int argc, char **argv, char **azColName) {
-    int i;
-   for(i = 0; i<argc; i++) {
-      printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-   }
-   printf("\n");
+    // int i;
+//    for(i = 0; i<argc; i++) {
+//       printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+//    }
+//    printf("\n");
    return 0;
 };

@@ -41,7 +41,6 @@ using namespace ServerN;
 
 int main()
 {
-// g++ server.cpp Server.cpp DB.cpp Callback.cpp Router.cpp -levent -l sqlite3
 
   if (!event_init())
   {
@@ -49,7 +48,7 @@ int main()
     return -1;
   }
 
-  Server server("127.0.0.1", 8000);
+  const Server server("127.0.0.1", 8000);
   
   std::unique_ptr<evhttp, decltype(&evhttp_free)> libServer(evhttp_start(server.getAddress().c_str(), server.getPort()), &evhttp_free);
   

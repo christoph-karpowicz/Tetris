@@ -4,7 +4,7 @@
 
 using namespace G;
 
-GameObject::GameObject(int startX, int startY): 
+GameObject::GameObject(const int startX, const int startY): 
     x(startX),
     y(startY)
 {
@@ -23,17 +23,17 @@ int GameObject::getY() const {
     return y;
 };
 
-void GameObject::setX(int newX) {
+void GameObject::setX(const int newX) {
     x = newX;
 };
 
-void GameObject::setY(int newY) {
+void GameObject::setY(const int newY) {
     y = newY;
 };
 
-void GameObject::horizontalMovement(bool left) {};
+void GameObject::horizontalMovement(const bool left) {};
 
-bool GameObject::isStill() {
+bool GameObject::isStill() const {
     return still;
 };
 
@@ -41,6 +41,6 @@ void GameObject::setStill() {
     still = true;
 };
 
-int* GameObject::bottomRightCoordinates() {
+int* GameObject::bottomRightCoordinates() const {
     return 0;
 };
