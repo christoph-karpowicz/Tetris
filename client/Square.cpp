@@ -4,11 +4,8 @@ using namespace G;
 
 Square::Square(const int startX, const int startY, const int w, const int h): 
     GameObject(startX, startY),
-    width(w),
-    height(h) 
-{
-    active = false;
-};
+    Shape(w, h)
+{};
 
 void Square::horizontalMovement(const bool left) {
     int change = left ? width * (-1) : width;

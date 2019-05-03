@@ -11,6 +11,16 @@ using namespace std;
 
 namespace G {
 
+    class Shape {
+        protected:
+            const int width, height;
+            virtual int getWidth() const = 0;
+            virtual int getHeight() const = 0;
+        public:
+            Shape(const int w, const int h);
+
+    };
+
     class GameObject {
         protected: 
             int x, y;
@@ -23,17 +33,14 @@ namespace G {
             int getY() const;
             void setX(int newX);
             void setY(int newY);
-            virtual void horizontalMovement(const bool left);
+            virtual void horizontalMovement(const bool left) = 0;
             bool isStill() const;
             void setStill();
-            virtual int* bottomRightCoordinates() const;
+            virtual int* bottomRightCoordinates() const = 0;
             
     };
 
-    class Square: public GameObject {
-        private:
-            const int width, height;
-            bool active;
+    class Square: public GameObject, private Shape {
         
         public:
             Square(const int startX, const int startY, const int w, const int h);
@@ -58,6 +65,7 @@ namespace G {
             ~SquareSet();
             void fill(const int w, const int h);
             Square*** getSquares() const;
+            int* bottomRightCoordinates() const;
             void horizontalMovement(const bool left);
             bool nextToBorder(const int w, const bool left) const;
             void rotate();
@@ -76,7 +84,8 @@ namespace G {
 
     class Game {
         private:
-            bool gameOver, stopped;
+            static Game* currentInstance;
+            bool gameOver, paused;
             const int width, height, squareWidth, squareHeight;
             int score, gameSpeed;
             mutable SquareSet* squareSet;
@@ -94,14 +103,16 @@ namespace G {
             int getScore() const;
             void setScore(const int newScore);
             bool isGameOver() const;
+            
         public:
             Game(const int w, const int h);
+            bool getPaused() const;
             emscripten::val getState() const;
-            void update();
             void moveSquareSet(const bool left);
-            void rotateSquareSet() const;
             void reset();
-            void setIsStopped(const bool val);
+            void rotateSquareSet() const;
+            void setPaused(const bool val);
+            void update();
     };
 
     void verticallySymetric(Square*** tmpArray, SquareSet& squareSet);

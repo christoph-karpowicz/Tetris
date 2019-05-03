@@ -31,16 +31,10 @@ void GameObject::setY(const int newY) {
     y = newY;
 };
 
-void GameObject::horizontalMovement(const bool left) {};
-
 bool GameObject::isStill() const {
     return still;
 };
 
 void GameObject::setStill() {
     still = true;
-};
-
-int* GameObject::bottomRightCoordinates() const {
-    return 0;
 };

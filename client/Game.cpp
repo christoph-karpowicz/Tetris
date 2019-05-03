@@ -6,15 +6,14 @@
 #include <emscripten/bind.h>
 #include "objects.h"
 
+// Emscripten JS functions. 
 EM_JS(void, drawSquare, (int x, int y, int w, int h), {
     const canvas = document.querySelector('canvas');
     const context = canvas.getContext('2d');
     context.fillStyle = '#a5a5a5';
     context.beginPath();
     context.fillRect(x, y, w, h);
-    // context.fillRect(50, 50, 50, 50);
     context.fill();
-    // console.log(x, y, w, h);
 });
 
 EM_JS(void, clearCanvas, (), {
@@ -30,10 +29,12 @@ EM_JS(void, dump, (string data), {
 using namespace G;
 using namespace std;
 
+Game* Game::currentInstance = nullptr;
+
 Game::Game(const int w, const int h): width(w), height(h), squareWidth(w/10), squareHeight(height/10) {
     squaresList = {};
     init();
-    setIsStopped(true);
+    setPaused(true);
 };
 
 void Game::increaseGameSpeed() {
@@ -70,7 +71,9 @@ void Game::init() {
 
 void Game::update() {
 
-    if (stopped) return;
+    Game::currentInstance = this;
+
+    if (paused) return;
         
     bool reset = false;
     clearCanvas();
@@ -226,6 +229,10 @@ void Game::clearRows() {
 
 };
 
+bool Game::getPaused() const {
+    return paused;
+};
+
 int Game::getScore() const {
     return score;
 };
@@ -240,6 +247,10 @@ void Game::increaseScore() {
 void Game::moveSquareSet(const bool left) {
     if (!squareSet->nextToBorder(width, left))
         left ? ++(*squareSet) : (*squareSet)++;
+};
+
+void Game::setPaused(const bool val) {
+    paused = val;
 };
 
 void Game::reset() {
@@ -259,21 +270,9 @@ void Game::setScore(const int newScore) {
     score = newScore;
 };
 
-void Game::setIsStopped(const bool val) {
-    stopped = val;
-};
-
 emscripten::val Game::getState() const {
     emscripten::val returnVal = emscripten::val::object();
     returnVal.set("isGameOver", emscripten::val(isGameOver()));
     returnVal.set("score", emscripten::val(getScore()));
     return returnVal;
 };
-
-// emscripten::val Game::getSquareAtPostion(int position) {
-//     // string squareDescription = "y: " + to_string(squareSetsVector.at(position).getY());
-//     // return squareSetsVector.at(position);
-//     emscripten::val returnVal = emscripten::val::object();
-//     returnVal.set("square", emscripten::val(squareSetsVector.at(position).getYY()));
-//     return returnVal;
-// };

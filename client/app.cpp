@@ -18,15 +18,16 @@ EMSCRIPTEN_BINDINGS() {
       .function("rotateSquareSet", &Game::rotateSquareSet)
       .function("getState", &Game::getState)
       .function("reset", &Game::reset)
-      .function("setIsStopped", &Game::setIsStopped)
+      .function("getPaused", &Game::getPaused)
+      .function("setPaused", &Game::setPaused)
       .function("update", &Game::update);
 
-    emscripten::class_<GameObject>("GameObject")
-      .constructor<int, int>()
-      .function("isStill", &GameObject::isStill)
-      .function("setStill", &GameObject::setStill)
-      .function("bottomRightCoordinates", &GameObject::bottomRightCoordinates, emscripten::allow_raw_pointers())
-      .function("moveDown", &GameObject::moveDown);
+    // emscripten::class_<GameObject>("GameObject")
+    //   .constructor<int, int>()
+    //   .function("isStill", &GameObject::isStill)
+    //   .function("setStill", &GameObject::setStill)
+    //   .function("bottomRightCoordinates", &GameObject::bottomRightCoordinates, emscripten::allow_raw_pointers())
+    //   .function("moveDown", &GameObject::moveDown);
 
     emscripten::class_<Square, emscripten::base<GameObject>>("Square")
       .constructor<int, int, int, int>() 

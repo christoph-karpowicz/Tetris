@@ -93,6 +93,10 @@ SquareSet& SquareSet::operator>>(const int speed) {
 
 }
 
+int* SquareSet::bottomRightCoordinates() const {
+    return nullptr;
+}
+
 void SquareSet::horizontalMovement(const bool left) {
     int squareWidth = 0;
     for (int i = 0; i < 3; i++) {

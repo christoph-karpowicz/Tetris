@@ -85,8 +85,8 @@ Server::Server(const std::string addr, const std::uint16_t prt): address(addr), 
         evhttp_parse_query(uri, &headers);
 
         std::string sPath = path;
-        const std::string jsFilePath = "/app.js";
-        const std::string wasmFilePath = "/app.wasm";
+        const std::string jsFilePath = "/client/app.js";
+        const std::string wasmFilePath = "/client/app.wasm";
 
         std::cout << "Got decoded path " << path << std::endl;
 
@@ -132,7 +132,7 @@ Server::Server(const std::string addr, const std::uint16_t prt): address(addr), 
 
                 // open a file in read mode.
                 ifstream indexFile; 
-                indexFile.open("client/index.html"); 
+                indexFile.open("index.html"); 
 
                 while (getline(indexFile, singleLine)) {
                     fileContent.append(singleLine);
@@ -165,11 +165,8 @@ Server::Server(const std::string addr, const std::uint16_t prt): address(addr), 
             struct stat st;
             evb = evbuffer_new();
 
-            // std::regex slash("^\\/");
-            // sPath = std::regex_replace(sPath, slash, "");
-            sPath = "client" + sPath;
-
-            cout << sPath << endl;
+            std::regex slash("^\\/");
+            sPath = std::regex_replace(sPath, slash, "");
 
             int fd = -1;
             if ((fd = open(sPath.c_str(), O_RDONLY)) < 0) {

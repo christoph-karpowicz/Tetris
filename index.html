@@ -81,6 +81,12 @@
         left: 32%;
         display: block;
     }
+    #pause-modal {
+        z-index: 3;
+        top: 35%;
+        left: 29%;
+        display: none;
+    }
     #gameOver-modal {
         z-index: 3;
         top: 35%;
@@ -106,6 +112,10 @@
                 <div class="game-modal" id="start-modal">
                     <div>NEW GAME</div>
                     <button onclick="Module.start()">Start</button>
+                </div>
+                <div class="game-modal" id="pause-modal">
+                    <div>GAME PAUSED</div>
+                    Press "p" to continue.
                 </div>
                 <div class="game-modal" id="gameOver-modal">
                     <div>GAME OVER</div>
@@ -170,6 +180,7 @@ class Game {
         this.gameOver = false;
         this.score = 0;
         this.leaderboard = null;
+        this.paused = true;
     }
 
     getLeaderboard() {
@@ -235,7 +246,6 @@ class Game {
     }
 
     isNewHighScore() {
-        // console.log(this.score, Number(this.leaderboard[0].score));
         return this.score > (this.leaderboard.length > 0 ? Number(this.leaderboard[0].score) : 0);
     }
 
@@ -259,6 +269,12 @@ class Game {
         this.setGameOver(state.isGameOver);
     }
 
+    pause() {
+        this.paused = true;
+        this.gameInstance.setPaused(true);
+        $("#pause-modal").css("display", "block");
+    }
+
     reset() {
         this.gameInstance.reset();
         this.getLeaderboard();
@@ -279,19 +295,26 @@ class Game {
 
     setKeyBindings() {
         let self = this;
-        $(document).keypress(function(e) {
-            switch (e.keyCode) {
-                case 97:
-                    !self.gameOver && self.gameInstance.moveSquareSet(true);
+
+        document.addEventListener("keydown", function(event) {
+
+            switch (event.which) {
+                case 65:
+                    !self.gameOver && !self.paused && self.gameInstance.moveSquareSet(true);
                     break;
-                case 100:
-                    !self.gameOver && self.gameInstance.moveSquareSet(false);
+                case 68:
+                    !self.gameOver && !self.paused && self.gameInstance.moveSquareSet(false);
                     break;
-                case 119:
-                    !self.gameOver && self.gameInstance.rotateSquareSet();
+                case 87:
+                    !self.gameOver && !self.paused && self.gameInstance.rotateSquareSet();
+                    break;
+                case 80:
+                    !self.gameOver && !self.paused ? self.pause() : self.unPause();
                     break;
             }
+
         });
+
     }
 
     setNewHighScore() {
@@ -324,8 +347,14 @@ class Game {
     }
 
     start() {
-        this.gameInstance.setIsStopped(false);
+        this.unPause();
         $("#start-modal").css("display", "none");
+    }
+
+    unPause() {
+        this.paused = false;
+        this.gameInstance.setPaused(false);
+        $("#pause-modal").css("display", "none");
     }
 
 }
@@ -337,6 +366,6 @@ var Module = new Game({
 Module.init();
 
 </script>
-<script src="app.js"></script>
+<script src="client/app.js"></script>
 </body>
 </html>
