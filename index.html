@@ -15,6 +15,7 @@
         padding-top: 10px;
     }
     .grid-left {
+        padding: 10px;
         grid-area: left;
     }
     .grid-center {
@@ -53,6 +54,10 @@
         margin: auto;
         background-color: #fff;
         border: 1px solid #000;
+    }
+    .column-title {
+        margin: 5px;
+        text-decoration: underline;
     }
     .game-modal {
         position: absolute;
@@ -99,12 +104,33 @@
         left: 6%;
         display: none;
     }
+
+    #logs-window {
+        
+    }
+    .logs {
+        background-color: #ededed;
+        padding: 2px;
+        margin: 3px;
+    }
+    .logs-date {
+        font-style: italic;
+        font-size: .6em;
+    }
+    .logs-message {
+        font-size: .75em;
+        font-weight: bold;
+    }
+
 </style>
 </head>
 <button id="send">tttt</button><br />
 <div class="wrapper">
     <div class="grid-left">
-        
+        <h3 class="column-title">Log:</h3>
+        <div id="logs-window">
+            
+        </div>
     </div>
     <div class="grid-center">
         <div id="game-wrapper">
@@ -137,7 +163,7 @@
         </div>
     </div>
     <div class="grid-right">
-        Leaderboard:
+        <h3 class="column-title">Leaderboard:</h3>
         <table id="leaderboard">
             <tr>
                 <th>Score</th>
@@ -151,25 +177,26 @@
 
 $('#send').on('click', (e) => {
     e.preventDefault();
-    $.ajax({
-        method: "GET",
-        url: "/",
-        data: {
-            insertIntoLeaderboard: "1",
-            // test: "1",
-            name: "test2",
-            score: 3,
-            added: "2019-04-22"
-        },
-        success: function(res) {
-            console.log(res);
-            // let response = JSON.parse(res);
-            // console.log(response);
-        },
-        error: function(res) {
-            console.log(res);
-        }
-    });
+    
+    // console.log(Module.getGameToString().parsedGame);
+    // console.log(Module.getLogs());
+    
+    // $.ajax({
+    //     method: "GET",
+    //     url: "/",
+    //     data: {
+    //         saveGame: "1",
+    //         gameString: Module.getGameToString()
+    //     },
+    //     success: function(res) {
+    //         console.log(res);
+    //         // let response = JSON.parse(res);
+    //         // console.log(response);
+    //     },
+    //     error: function(res) {
+    //         console.log(res);
+    //     }
+    // });
 });
 
 class Game {
@@ -180,7 +207,12 @@ class Game {
         this.gameOver = false;
         this.score = 0;
         this.leaderboard = null;
-        this.paused = true;
+        this.started = false;
+        this.paused = false;
+    }
+
+    getGameToString() {
+        return this.gameInstance.getGameToString().parsedGame;
     }
 
     getLeaderboard() {
@@ -249,6 +281,34 @@ class Game {
         return this.score > (this.leaderboard.length > 0 ? Number(this.leaderboard[0].score) : 0);
     }
 
+    log(logs) {
+        let logArray = logs.split("||");
+        if (logArray.length > 1) {
+            logArray.pop();
+            let logsToAdd = logArray.length,
+                allowed = 10;
+
+            if ($(".logs").length + logsToAdd > allowed) {
+                let logsToRemove = Number($(".logs").length + logsToAdd) - Number(allowed);
+                for (let i = 0; i < logsToRemove; i++) {
+                    $(".logs")[i].remove();
+                }
+            }
+            
+            logArray.forEach(log => {
+                let logDOMElement = $("<p/>").attr("class", "logs"),
+                    logDateDOMElement = $("<span/>").attr("class", "logs-date"),
+                    logMessageDOMElement = $("<span/>").attr("class", "logs-message"),
+                    date = log.split("$$")[0],
+                    message = log.split("$$")[1];
+                logDateDOMElement.append(date);
+                logMessageDOMElement.append(message);
+                logDOMElement.append(logDateDOMElement, logMessageDOMElement);
+                $("#logs-window").append(logDOMElement);
+            });
+        }
+    }
+
     onRuntimeInitialized() {
 
         this.gameInstance = new Module.Game(this.width, this.height);
@@ -267,6 +327,7 @@ class Game {
         let state = this.gameInstance.getState();
         this.setScore(state.score);
         this.setGameOver(state.isGameOver);
+        this.log(state.logs);
     }
 
     pause() {
@@ -289,7 +350,9 @@ class Game {
         } 
         if (this.gameOver && !val) {
             $("#gameOver-modal").css("display", "none");
+            this.start();
         }
+        !this.gameOver && val && this.stop();
         this.gameOver = val;
     }
 
@@ -300,16 +363,16 @@ class Game {
 
             switch (event.which) {
                 case 65:
-                    !self.gameOver && !self.paused && self.gameInstance.moveSquareSet(true);
+                    !self.gameOver && !self.paused && self.started && self.gameInstance.moveSquareSet(true);
                     break;
                 case 68:
-                    !self.gameOver && !self.paused && self.gameInstance.moveSquareSet(false);
+                    !self.gameOver && !self.paused && self.started && self.gameInstance.moveSquareSet(false);
                     break;
                 case 87:
-                    !self.gameOver && !self.paused && self.gameInstance.rotateSquareSet();
+                    !self.gameOver && !self.paused && self.started && self.gameInstance.rotateSquareSet();
                     break;
                 case 80:
-                    !self.gameOver && !self.paused ? self.pause() : self.unPause();
+                    self.started && (!self.gameOver && !self.paused ? self.pause() : self.unPause());
                     break;
             }
 
@@ -347,8 +410,14 @@ class Game {
     }
 
     start() {
-        this.unPause();
+        this.started = true;
+        this.gameInstance.setStarted(true);
         $("#start-modal").css("display", "none");
+    }
+
+    stop() {
+        this.started = false;
+        this.gameInstance.setStarted(false);
     }
 
     unPause() {

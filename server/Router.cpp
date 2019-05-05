@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <fstream>
 
 #include <fstream>
 #include <cstring>
@@ -59,7 +60,23 @@ void Router::createGETResponses() const {
 
         db->insert(inputData.at("name"), inputData.at("score"), inputData.at("added"));
 
-        std::string response = "ok";
+        std::string response = "Record saved.";
+        
+        res.setResponse(response);
+        return res;
+    };
+
+    // saveGame request
+    GETResponses["saveGame"] = [](Database::DB* db, const std::map<std::string, std::string> &inputData) {
+        GETResponse res;
+        
+        cout << inputData.at("gameString") << endl;
+        
+        std::ofstream file("server/saves/save.txt");
+        file << inputData.at("gameString") << std::endl;
+        file.close();
+
+        std::string response = "Game saved.";
         
         res.setResponse(response);
         return res;

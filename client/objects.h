@@ -82,10 +82,19 @@ namespace G {
 
     };
 
+    class Logger {
+        private:
+            static vector<string> queue;
+        public:
+            static void add(string log);
+            static void clear();
+            static vector<string> getLogs();
+    };
+
     class Game {
         private:
             static Game* currentInstance;
-            bool gameOver, paused;
+            bool gameOver, started, paused;
             const int width, height, squareWidth, squareHeight;
             int score, gameSpeed;
             mutable SquareSet* squareSet;
@@ -95,24 +104,38 @@ namespace G {
             void init();
             void addSquareSet() const;
             void deleteSquareSet() const;
-            int getGameSpeed() const;
+            string getLogs() const;
             void increaseGameSpeed();
             void setGameSpeed(const int speed);
             void setGameStatus(const bool over);
             void increaseScore();
-            int getScore() const;
             void setScore(const int newScore);
             bool isGameOver() const;
             
         public:
             Game(const int w, const int h);
+            SquareSet* getActiveSquareSet() const;
+            int getGameSpeed() const;
+            emscripten::val getGameToString() const;
             bool getPaused() const;
+            int getScore() const;
+            list<Square*> getSquaresList() const;
+            bool getStarted() const;
             emscripten::val getState() const;
             void moveSquareSet(const bool left);
             void reset();
             void rotateSquareSet() const;
             void setPaused(const bool val);
+            void setStarted(const bool val);
             void update();
+    };
+
+    class GameToStringParser {
+        private:
+            static GameToStringParser parser;
+            string parse(Game &game);
+        public:
+            static string parseGame(Game* game);
     };
 
     void verticallySymetric(Square*** tmpArray, SquareSet& squareSet);

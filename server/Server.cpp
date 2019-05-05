@@ -123,6 +123,15 @@ Server::Server(const std::string addr, const std::uint16_t prt): address(addr), 
                 evbuffer_add_printf(OutBuf, res);
 
             } 
+            else if (evhttp_find_header(&headers, "saveGame") != NULL) {
+
+                const string gameString = std::string(evhttp_find_header(&headers, "gameString"));
+                inputData.insert(pair<std::string, std::string>("gameString", gameString));
+                res = router("saveGame", inputData);
+
+                evbuffer_add_printf(OutBuf, res);
+
+            } 
             else {
 
                 /** 

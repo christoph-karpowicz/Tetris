@@ -32,9 +32,11 @@ using namespace std;
 Game* Game::currentInstance = nullptr;
 
 Game::Game(const int w, const int h): width(w), height(h), squareWidth(w/10), squareHeight(height/10) {
+    Logger::add("Game loaded.");
+    paused = false;
     squaresList = {};
     init();
-    setPaused(true);
+    setStarted(false);
 };
 
 void Game::increaseGameSpeed() {
@@ -43,14 +45,39 @@ void Game::increaseGameSpeed() {
         newSpeed++;
     }
     setGameSpeed(newSpeed);
+    Logger::add("Game speed increased to " + to_string(newSpeed) + ".");
 };
 
 void Game::setGameSpeed(const int speed) {
     gameSpeed = speed;
 };
 
+SquareSet* Game::getActiveSquareSet() const {
+    return squareSet;
+};
+
 int Game::getGameSpeed() const {
     return gameSpeed;
+};
+
+emscripten::val Game::getGameToString() const {
+    emscripten::val returnVal = emscripten::val::object();
+    returnVal.set("parsedGame", emscripten::val(GameToStringParser::parseGame(Game::currentInstance)));
+    return returnVal;
+};
+
+string Game::getLogs() const {
+    string logs = "";
+    for (string log : Logger::getLogs()) {
+        logs.append(log);
+        logs.append("||");
+    }
+    Logger::clear();
+    return logs;
+};
+
+list<Square*> Game::getSquaresList() const {
+    return squaresList;
 };
 
 bool Game::isGameOver() const {
@@ -58,6 +85,7 @@ bool Game::isGameOver() const {
 };
 
 void Game::setGameStatus(const bool over) {
+    if (over) Logger::add("Game over.");
     gameOver = over;
 };
 
@@ -66,14 +94,16 @@ void Game::init() {
     squaresList.clear();
     setGameStatus(false);
     setGameSpeed(2);
+    setStarted(false);
     setScore(0);
+    Logger::add("Game initialized.");
 };
 
 void Game::update() {
 
     Game::currentInstance = this;
 
-    if (paused) return;
+    if (paused || !started) return;
         
     bool reset = false;
     clearCanvas();
@@ -237,11 +267,17 @@ int Game::getScore() const {
     return score;
 };
 
+bool Game::getStarted() const {
+    return started;
+};
+
 void Game::increaseScore() {
-    setScore(getScore() + 1);
+    int newScore = getScore() + 1;
+    setScore(newScore);
     if (getScore() % 1 == 0) {
         increaseGameSpeed();
     }
+    Logger::add("Row cleared. Score increased to " + to_string(newScore) + ".");
 };
 
 void Game::moveSquareSet(const bool left) {
@@ -250,10 +286,12 @@ void Game::moveSquareSet(const bool left) {
 };
 
 void Game::setPaused(const bool val) {
+    Logger::add(val ? "Game paused." : "Game unpaused.");
     paused = val;
 };
 
 void Game::reset() {
+    Logger::add("Another try.");
     init();
 };
 
@@ -270,9 +308,15 @@ void Game::setScore(const int newScore) {
     score = newScore;
 };
 
+void Game::setStarted(const bool val) {
+    if (val) Logger::add("Game started.");
+    started = val;
+};
+
 emscripten::val Game::getState() const {
     emscripten::val returnVal = emscripten::val::object();
     returnVal.set("isGameOver", emscripten::val(isGameOver()));
     returnVal.set("score", emscripten::val(getScore()));
+    returnVal.set("logs", emscripten::val(getLogs()));
     return returnVal;
 };
