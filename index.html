@@ -4,9 +4,7 @@
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <style>
-    body {
-        
-    }
+    /* Game grid */
     .wrapper {
         display: grid;
         grid-template-columns: 1fr auto 1fr;
@@ -59,6 +57,8 @@
         margin: 5px;
         text-decoration: underline;
     }
+
+    /* Modals */
     .game-modal {
         position: absolute;
         border: 1px solid #000;
@@ -105,9 +105,7 @@
         display: none;
     }
 
-    #logs-window {
-        
-    }
+    /* Logs */
     .logs {
         background-color: #ededed;
         padding: 2px;
@@ -122,9 +120,18 @@
         font-weight: bold;
     }
 
+    /* Leaderboard */
+    #leaderboard th {
+        border-bottom: 1px solid #282828;
+    }
+    #leaderboard td, th {
+        background-color: #ededed;
+        font-size: .75em;
+        padding: 6px;
+    }
+
 </style>
 </head>
-<button id="send">tttt</button><br />
 <div class="wrapper">
     <div class="grid-left">
         <h3 class="column-title">Log:</h3>
@@ -174,30 +181,6 @@
     </div>
 </div>
 <script>
-
-$('#send').on('click', (e) => {
-    e.preventDefault();
-    
-    // console.log(Module.getGameToString().parsedGame);
-    // console.log(Module.getLogs());
-    
-    // $.ajax({
-    //     method: "GET",
-    //     url: "/",
-    //     data: {
-    //         saveGame: "1",
-    //         gameString: Module.getGameToString()
-    //     },
-    //     success: function(res) {
-    //         console.log(res);
-    //         // let response = JSON.parse(res);
-    //         // console.log(response);
-    //     },
-    //     error: function(res) {
-    //         console.log(res);
-    //     }
-    // });
-});
 
 class Game {
 

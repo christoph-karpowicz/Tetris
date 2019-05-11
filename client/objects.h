@@ -58,11 +58,13 @@ namespace G {
             Square*** squaresArray;
             int numberOfSquares;
             bool corrected;
+            bool validateRotation(list<Square*> squaresList, Square*** tmpArray);
                     
         public:
             static bool instanceActive;
             SquareSet(const int startX, const int startY);
             ~SquareSet();
+            bool isBeyondBorder(const int w, Square*** tmpArray) const;
             void fill(const int w, const int h);
             Square*** getSquares() const;
             int* bottomRightCoordinates() const;
@@ -93,7 +95,6 @@ namespace G {
 
     class Game {
         private:
-            static Game* currentInstance;
             bool gameOver, started, paused;
             const int width, height, squareWidth, squareHeight;
             int score, gameSpeed;
@@ -109,11 +110,13 @@ namespace G {
             void setGameSpeed(const int speed);
             void setGameStatus(const bool over);
             void increaseScore();
+            bool isSquareSetBlocked();
             void setScore(const int newScore);
             bool isGameOver() const;
             
         public:
             Game(const int w, const int h);
+            static Game* currentInstance;
             SquareSet* getActiveSquareSet() const;
             int getGameSpeed() const;
             emscripten::val getGameToString() const;
@@ -122,6 +125,7 @@ namespace G {
             list<Square*> getSquaresList() const;
             bool getStarted() const;
             emscripten::val getState() const;
+            int getWidth() const;
             void moveSquareSet(const bool left);
             void reset();
             void rotateSquareSet() const;

@@ -7,16 +7,14 @@ void G::verticallySymetric(Square*** tmpArray, SquareSet& squareSet) {
             if (squareSet.squaresArray[i][j] != 0) {
                 if (i == 0) {
                     int newY = squareSet.getY() + (squareSet.squaresArray[i][j]->getHeight() * 2);
-                    squareSet.squaresArray[i][j]->setY(newY);
-                    tmpArray[2][j] = squareSet.squaresArray[i][j];
+                    tmpArray[2][j] = new Square(squareSet.squaresArray[i][j]->getX(), newY, squareSet.squaresArray[i][j]->getWidth(), squareSet.squaresArray[i][j]->getHeight());
                 }
                 if (i == 1) {
-                    tmpArray[i][j] = squareSet.squaresArray[i][j];
+                    tmpArray[i][j] = new Square(squareSet.squaresArray[i][j]->getX(), squareSet.squaresArray[i][j]->getY(), squareSet.squaresArray[i][j]->getWidth(), squareSet.squaresArray[i][j]->getHeight());
                 }
                 if (i == 2) {
                     int newY = squareSet.getY();
-                    squareSet.squaresArray[i][j]->setY(newY);
-                    tmpArray[0][j] = squareSet.squaresArray[i][j];
+                    tmpArray[0][j] = new Square(squareSet.squaresArray[i][j]->getX(), newY, squareSet.squaresArray[i][j]->getWidth(), squareSet.squaresArray[i][j]->getHeight());
                 }
             }
         }
@@ -31,16 +29,14 @@ void G::horizontallySymetric(Square*** tmpArray, SquareSet& squareSet) {
             if (squareSet.squaresArray[i][j] != 0) {
                 if (j == 0) {
                     int newX = squareSet.squaresArray[i][j]->getX() + (squareSet.squaresArray[i][j]->getWidth() * 2);
-                    squareSet.squaresArray[i][j]->setX(newX);
-                    tmpArray[i][2] = squareSet.squaresArray[i][j];
+                    tmpArray[i][2] = new Square(newX, squareSet.squaresArray[i][j]->getY(), squareSet.squaresArray[i][j]->getWidth(), squareSet.squaresArray[i][j]->getHeight());
                 }
                 if (j == 1) {
-                    tmpArray[i][j] = squareSet.squaresArray[i][j];
+                    tmpArray[i][j] = new Square(squareSet.squaresArray[i][j]->getX(), squareSet.squaresArray[i][j]->getY(), squareSet.squaresArray[i][j]->getWidth(), squareSet.squaresArray[i][j]->getHeight());
                 }
                 if (j == 2) {
                     int newX = squareSet.squaresArray[i][j]->getX() - (squareSet.squaresArray[i][j]->getWidth() * 2);
-                    squareSet.squaresArray[i][j]->setX(newX);
-                    tmpArray[i][0] = squareSet.squaresArray[i][j];
+                    tmpArray[i][0] = new Square(newX, squareSet.squaresArray[i][j]->getY(), squareSet.squaresArray[i][j]->getWidth(), squareSet.squaresArray[i][j]->getHeight());
                 }
             }
         }
@@ -57,12 +53,10 @@ void G::deg90p(Square*** tmpArray, SquareSet& squareSet) {
 
             if (squareSet.squaresArray[i][j] != 0) {
                 int newX = squareSet.getX() + (squareSet.squaresArray[i][j]->getWidth() * k);
-                squareSet.squaresArray[i][j]->setX(newX);
                 
                 int newY = squareSet.getY() + (squareSet.squaresArray[i][j]->getHeight() * j);
-                squareSet.squaresArray[i][j]->setY(newY);
                 
-                tmpArray[j][k] = squareSet.squaresArray[i][j];
+                tmpArray[j][k] = new Square(newX, newY, squareSet.squaresArray[i][j]->getWidth(), squareSet.squaresArray[i][j]->getHeight());
             }
         }
         k--;
@@ -77,12 +71,10 @@ void G::deg90m(Square*** tmpArray, SquareSet& squareSet) {
 
             if (squareSet.squaresArray[i][j] != 0) {
                 int newX = squareSet.getX() + (squareSet.squaresArray[i][j]->getWidth() * i);
-                squareSet.squaresArray[i][j]->setX(newX);
                 
                 int newY = squareSet.getY() + (squareSet.squaresArray[i][j]->getHeight() * j);
-                squareSet.squaresArray[i][j]->setY(newY);
                 
-                tmpArray[j][i] = squareSet.squaresArray[i][j];
+                tmpArray[j][i] = new Square(newX, newY, squareSet.squaresArray[i][j]->getWidth(), squareSet.squaresArray[i][j]->getHeight());
             }
         }
     }

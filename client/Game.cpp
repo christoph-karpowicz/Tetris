@@ -10,9 +10,18 @@
 EM_JS(void, drawSquare, (int x, int y, int w, int h), {
     const canvas = document.querySelector('canvas');
     const context = canvas.getContext('2d');
-    context.fillStyle = '#a5a5a5';
     context.beginPath();
+
+    context.fillStyle = '#282828';
     context.fillRect(x, y, w, h);
+    context.fill();
+
+    context.fillStyle = '#ffffff';
+    context.fillRect(x + 1, y + 1, w - 2, h - 2);
+    context.fill();
+
+    context.fillStyle = '#a5a5a5';
+    context.fillRect(x + 4, y + 4, w - 8, h - 8);
     context.fill();
 });
 
@@ -271,17 +280,46 @@ bool Game::getStarted() const {
     return started;
 };
 
+int Game::getWidth() const {
+    return width;
+};
+
 void Game::increaseScore() {
     int newScore = getScore() + 1;
     setScore(newScore);
+    Logger::add("Row cleared. Score increased to " + to_string(newScore) + ".");
     if (getScore() % 1 == 0) {
         increaseGameSpeed();
     }
-    Logger::add("Row cleared. Score increased to " + to_string(newScore) + ".");
 };
 
+bool Game::isSquareSetBlocked() {
+
+    bool blocked = false;
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if ((*squareSet)[i][j] != 0) {
+
+                for (Square* &s : squaresList) {
+
+                    if ((s->getX() == (*squareSet)[i][j]->getX() + s->getWidth() || s->getX() == (*squareSet)[i][j]->getX() - s->getWidth()) && (*squareSet)[i][j]->getY() + (*squareSet)[i][j]->getHeight() >= s->getY() - getGameSpeed() && (*squareSet)[i][j]->getY() <= s->getY() + s->getHeight() + getGameSpeed()) {
+                        blocked = true;
+                    }
+                    
+                }
+
+            }
+        }
+    }
+
+    return blocked;
+
+}
+
 void Game::moveSquareSet(const bool left) {
-    if (!squareSet->nextToBorder(width, left))
+    // Checks if squareSet is blocked by game border or other squares.
+    if (!squareSet->nextToBorder(width, left) && !isSquareSetBlocked())
         left ? ++(*squareSet) : (*squareSet)++;
 };
 

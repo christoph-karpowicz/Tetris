@@ -26,6 +26,20 @@ SquareSet::SquareSet(const int startX, const int startY):
 
 };
 
+bool SquareSet::isBeyondBorder(const int w, Square*** tmpArray) const {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (tmpArray[i][j] != 0) {
+                if (tmpArray[i][j]->getX() < 0 || tmpArray[i][j]->getX() >= w - tmpArray[i][j]->getWidth()) {
+                    return true;
+                    break;
+                }
+            }
+        }
+    }
+    return false;
+};
+
 void SquareSet::fill(const int w, const int h) {
     int squaresCreated = 0;
     int randRow, randCol;
@@ -139,6 +153,7 @@ void SquareSet::rotate() {
         }
     }
     
+    // Perform a random rotation. 
     srand(time(NULL));
     int rotationType = rand() % 4 + 1;
     switch (rotationType) {
@@ -156,13 +171,49 @@ void SquareSet::rotate() {
             break;
     }
 
-    for (int i = 0; i < 3; i++) {
-        delete [] squaresArray[i];
+    // Checks if any of the squares have end up outside the border or inside another square.
+    if (validateRotation(Game::currentInstance->getSquaresList(), tmpSquaresArray)) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                delete squaresArray[i][j];
+            }
+            delete [] squaresArray[i];
+        }
+        delete [] squaresArray;
+
+        squaresArray = tmpSquaresArray;
+    } 
+
+};
+
+bool SquareSet::validateRotation(list<Square*> squaresList, Square*** tmpArray) {
+    
+    // Is beyond the border.
+    if (isBeyondBorder(Game::currentInstance->getWidth(), tmpArray)) {
+        return false;
     }
-    delete [] squaresArray;
 
-    squaresArray = tmpSquaresArray;
+    bool valid = true;
 
+    // Is on another square. 
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (tmpArray[i][j] != 0) {
+
+                for (Square* &s : squaresList) {
+
+                    if ((s->getX() == tmpArray[i][j]->getX() + s->getWidth() || s->getX() == tmpArray[i][j]->getX() - s->getWidth()) && tmpArray[i][j]->getY() + tmpArray[i][j]->getHeight() >= s->getY() && tmpArray[i][j]->getY() <= s->getY() + s->getHeight()) {
+                        valid = false;
+                    }
+                    
+                }
+
+            }
+        }
+    }
+
+    return valid;
+    
 };
 
 SquareSet& SquareSet::operator++() {
