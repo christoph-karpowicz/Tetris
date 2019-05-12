@@ -65,11 +65,11 @@ namespace G {
             SquareSet(const int startX, const int startY);
             ~SquareSet();
             bool isBeyondBorder(const int w, Square*** tmpArray) const;
+            bool isNextToBorder(const int w, const bool left) const;
             void fill(const int w, const int h);
             Square*** getSquares() const;
             int* bottomRightCoordinates() const;
             void horizontalMovement(const bool left);
-            bool nextToBorder(const int w, const bool left) const;
             void rotate();
 
             SquareSet& operator++();

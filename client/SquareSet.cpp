@@ -40,6 +40,20 @@ bool SquareSet::isBeyondBorder(const int w, Square*** tmpArray) const {
     return false;
 };
 
+bool SquareSet::isNextToBorder(const int w, const bool left) const {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (squaresArray[i][j] != 0) {
+                if ((squaresArray[i][j]->getX() == 0 && left) || (squaresArray[i][j]->getX() == w - squaresArray[i][j]->getWidth() && !left)) {
+                    return true;
+                    break;
+                }
+            }
+        }
+    }
+    return false;
+};
+
 void SquareSet::fill(const int w, const int h) {
     int squaresCreated = 0;
     int randRow, randCol;
@@ -117,9 +131,11 @@ void SquareSet::horizontalMovement(const bool left) {
         for (int j = 0; j < 3; j++) {
             if (squaresArray[i][j] != 0) {
                 if (left) {
+                    // Move left.
                     ++(*squaresArray[i][j]);
                 }
                 else 
+                    // Move right.
                     (*squaresArray[i][j])++;
                 if (squareWidth == 0) squareWidth = squaresArray[i][j]->getWidth();
             }
@@ -127,20 +143,6 @@ void SquareSet::horizontalMovement(const bool left) {
     }
     int change = left ? squareWidth * (-1) : squareWidth;
     setX(x + change);
-};
-
-bool SquareSet::nextToBorder(const int w, const bool left) const {
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            if (squaresArray[i][j] != 0) {
-                if ((squaresArray[i][j]->getX() == 0 && left) || (squaresArray[i][j]->getX() == w - squaresArray[i][j]->getWidth() && !left)) {
-                    return true;
-                    break;
-                }
-            }
-        }
-    }
-    return false;
 };
 
 void SquareSet::rotate() {

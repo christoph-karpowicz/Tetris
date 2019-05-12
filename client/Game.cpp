@@ -50,6 +50,7 @@ Game::Game(const int w, const int h): width(w), height(h), squareWidth(w/10), sq
 
 void Game::increaseGameSpeed() {
     int newSpeed = gameSpeed + 1;
+    // Find next speed, that will match Game parameters.  
     while (newSpeed % gameSpeed != 0 || height % newSpeed != 0 || squareHeight % newSpeed != 0 || (height - squareHeight) % newSpeed != 0 || (height + (3 * squareHeight)) % newSpeed != 0) {
         newSpeed++;
     }
@@ -76,6 +77,7 @@ emscripten::val Game::getGameToString() const {
 };
 
 string Game::getLogs() const {
+    // Consolidate logs from static Logger class. 
     string logs = "";
     for (string log : Logger::getLogs()) {
         logs.append(log);
@@ -99,6 +101,7 @@ void Game::setGameStatus(const bool over) {
 };
 
 void Game::init() {
+    // Game initialization. 
     SquareSet* squareSet = nullptr;
     squaresList.clear();
     setGameStatus(false);
@@ -121,8 +124,10 @@ void Game::update() {
 
         if (!SquareSet::instanceActive) addSquareSet();
 
+        // Checks if there any rows filled with squares.
         clearRows();
         
+        // Checks if the active SquareSet reached the bottom.
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if ((*squareSet)[i][j] != 0) {
@@ -135,6 +140,7 @@ void Game::update() {
             }
         }
 
+        // Checks if the active SquareSet reached one of the static sqaures.
         for (Square* &s : squaresList) {
 
             for (int i = 0; i < 3; i++) {
@@ -150,6 +156,7 @@ void Game::update() {
             
         }
 
+        // Transform active SquareSet into static squares.
         resetConditionsMet:
         if (reset) {
             for (int i = 0; i < 3; i++) {
@@ -175,8 +182,10 @@ void Game::update() {
         }
 
         if (!isGameOver()) {
+            // Move SquareSet.
             (*squareSet) >> getGameSpeed();
 
+            // Draw SquareSet.
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
                     if ((*squareSet)[i][j] != 0) {
@@ -191,6 +200,7 @@ void Game::update() {
         }
     }
 
+    // Draw static squares.
     for (Square* &s : squaresList) {
 
         int x = s->getX();
@@ -218,6 +228,7 @@ void Game::addSquareSet() const {
 
 void Game::clearRow(const int row, const int perRow) {
 
+    // Remove squares from squaresList.
     for (auto it = squaresList.begin(); it != squaresList.end(); ) {
 
         Square* sq = *it;
@@ -229,6 +240,7 @@ void Game::clearRow(const int row, const int perRow) {
 
     }
 
+    // Move squares from above down. 
     for (Square* &s : squaresList) {
 
         if (s->getY() < row * squareHeight) {
@@ -247,6 +259,7 @@ void Game::clearRows() {
     int squaresPerRow = width/squareWidth,
         rows = height/squareHeight;
 
+    // Checks if any of the rows are filled with sqaures.
     for (int i = 0; i < rows; i++) {
 
         int squaresFound = 0;
@@ -319,7 +332,7 @@ bool Game::isSquareSetBlocked() {
 
 void Game::moveSquareSet(const bool left) {
     // Checks if squareSet is blocked by game border or other squares.
-    if (!squareSet->nextToBorder(width, left) && !isSquareSetBlocked())
+    if (!squareSet->isNextToBorder(width, left) && !isSquareSetBlocked())
         left ? ++(*squareSet) : (*squareSet)++;
 };
 
@@ -352,6 +365,7 @@ void Game::setStarted(const bool val) {
 };
 
 emscripten::val Game::getState() const {
+    // Passes Game information to Javascript object. 
     emscripten::val returnVal = emscripten::val::object();
     returnVal.set("isGameOver", emscripten::val(isGameOver()));
     returnVal.set("score", emscripten::val(getScore()));

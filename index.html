@@ -133,15 +133,18 @@
 </style>
 </head>
 <div class="wrapper">
+    <!-- Logs -->
     <div class="grid-left">
         <h3 class="column-title">Log:</h3>
         <div id="logs-window">
             
         </div>
     </div>
+    <!-- Game grid -->
     <div class="grid-center">
         <div id="game-wrapper">
             <div id="game">
+                <!-- Modals -->
                 <div class="game-modal" id="start-modal">
                     <div>NEW GAME</div>
                     <button onclick="Module.start()">Start</button>
@@ -159,16 +162,19 @@
                     Name: <input id="newHighScoreNameInput" type="text" />
                     <button onclick="Module.setNewHighScore()">Sumbit score</button>
                 </div>
+                <!-- Game -->
                 <canvas id="g"></canvas>
             </div>
+            <!-- Score -->
             <div id="game-panel-left" class="panel">
                 Score: <span id="score">0</span>
             </div>
             <div id="game-panel-right" class="panel">
-
+                <!-- Empty -->
             </div>
         </div>
     </div>
+    <!-- Leaderboard -->
     <div class="grid-right">
         <h3 class="column-title">Leaderboard:</h3>
         <table id="leaderboard">
@@ -202,6 +208,7 @@ class Game {
 
         let self = this;
 
+        // Send Leaderboard request to server. 
         $.ajax({
             method: "GET",
             url: "/",
@@ -218,6 +225,7 @@ class Game {
 
                 leaderboard.pop();
 
+                // Show leaders.
                 leaderboard.forEach((record, i) => {
 
                     // Show only 10 results. 
@@ -265,12 +273,15 @@ class Game {
     }
 
     log(logs) {
+
+        // Parses log string received from .wasm Game object. 
         let logArray = logs.split("||");
         if (logArray.length > 1) {
             logArray.pop();
             let logsToAdd = logArray.length,
                 allowed = 10;
 
+            // Remove logs if there will be more than allowed number. 
             if ($(".logs").length + logsToAdd > allowed) {
                 let logsToRemove = Number($(".logs").length + logsToAdd) - Number(allowed);
                 for (let i = 0; i < logsToRemove; i++) {
@@ -278,6 +289,7 @@ class Game {
                 }
             }
             
+            // Add new logs into log container. 
             logArray.forEach(log => {
                 let logDOMElement = $("<p/>").attr("class", "logs"),
                     logDateDOMElement = $("<span/>").attr("class", "logs-date"),
@@ -290,14 +302,17 @@ class Game {
                 $("#logs-window").append(logDOMElement);
             });
         }
+        
     }
 
     onRuntimeInitialized() {
 
+        // Create new .wasm Game object. 
         this.gameInstance = new Module.Game(this.width, this.height);
 
         let self = this;
 
+        // Animation loop. Updates Game each time. 
         requestAnimationFrame(function f() {
             self.gameInstance.update();
             requestAnimationFrame(f);
@@ -307,6 +322,7 @@ class Game {
     }
 
     parseState() {
+        // Get Game state and distribute information to relevant properties. 
         let state = this.gameInstance.getState();
         this.setScore(state.score);
         this.setGameOver(state.isGameOver);
@@ -316,6 +332,7 @@ class Game {
     pause() {
         this.paused = true;
         this.gameInstance.setPaused(true);
+        // Hide Pause modal. 
         $("#pause-modal").css("display", "block");
     }
 
@@ -325,13 +342,18 @@ class Game {
     }
 
     setGameOver(val) {
+        // If game is over.
         if (!this.gameOver && val) {
+            // If player achieved the highest score ever. 
             if (this.isNewHighScore()) {
+                // Show highScore modal.
                 $("#highScore-modal").css("display", "block");
             }
+            // Show GameOver modal.
             $("#gameOver-modal").css("display", "block");
         } 
         if (this.gameOver && !val) {
+            // Hide GameOver modal.
             $("#gameOver-modal").css("display", "none");
             this.start();
         }
@@ -342,6 +364,7 @@ class Game {
     setKeyBindings() {
         let self = this;
 
+        // Set Game controls. 
         document.addEventListener("keydown", function(event) {
 
             switch (event.which) {
@@ -367,6 +390,7 @@ class Game {
             
         let self = this;
             
+        // Send new high score to server. 
         $.ajax({
             method: "GET",
             url: "/",
@@ -377,6 +401,7 @@ class Game {
                 added: new Date().toJSON().slice(0,10)
             },
             success: function(res) {
+                // Hide highScore modal. 
                 $("#highScore-modal").css("display", "none");
                 self.getLeaderboard();
             },
@@ -411,10 +436,12 @@ class Game {
 
 }
 
+// Create .wasm module. 
 var Module = new Game({
         width: 400,
         height: 400
     });
+// Initialize Game. 
 Module.init();
 
 </script>

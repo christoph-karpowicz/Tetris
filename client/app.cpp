@@ -25,13 +25,6 @@ EMSCRIPTEN_BINDINGS() {
       .function("setStarted", &Game::setStarted)
       .function("update", &Game::update);
 
-    // emscripten::class_<GameObject>("GameObject")
-    //   .constructor<int, int>()
-    //   .function("isStill", &GameObject::isStill)
-    //   .function("setStill", &GameObject::setStill)
-    //   .function("bottomRightCoordinates", &GameObject::bottomRightCoordinates, emscripten::allow_raw_pointers())
-    //   .function("moveDown", &GameObject::moveDown);
-
     emscripten::class_<Square, emscripten::base<GameObject>>("Square")
       .constructor<int, int, int, int>() 
       .function("getWidth", &Square::getWidth)  
